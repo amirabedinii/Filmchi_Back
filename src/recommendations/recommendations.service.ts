@@ -21,8 +21,10 @@ export class RecommendationsService {
   ) {}
 
   async getRecommendations(userId: string, userQuery: string): Promise<EnrichedRecommendation[]> {
+    Logger.debug({ userId, userQuery }, 'Recommendations: start');
     const watched = await this.listsService.getMoviesForList(userId, 'watched', { page: 1, limit: 50, sort: 'desc' });
     const watchlist = await this.listsService.getMoviesForList(userId, 'watchlist', { page: 1, limit: 50, sort: 'desc' });
+    Logger.debug({ watchedCount: watched.length, watchlistCount: watchlist.length }, 'Recommendations: list counts');
 
     const historyTitles = [
       ...watched.map((m: any) => m.title).filter(Boolean),
@@ -59,15 +61,65 @@ export class RecommendationsService {
       stream: false,
     } as any;
 
-    const ollamaResponse = await firstValueFrom(this.http.post(ollamaUrl + '/api/generate', body));
-    const rawRecs: RawRecommendation[] = ollamaResponse.data?.recommendations || [];
+    Logger.debug({ ollamaUrl, ollamaModel }, 'Recommendations: calling Ollama');
+    let ollamaResponse: any;
+    try {
+      ollamaResponse = await firstValueFrom(this.http.post(ollamaUrl + '/api/generate', body));
+    } catch (error: any) {
+      Logger.error({ err: error?.message, status: error?.response?.status }, 'Recommendations: Ollama request failed');
+      return [];
+    }
+
+    // Ollama with `format` usually returns a JSON string in `response`
+    // e.g. { response: "{ \"recommendations\": [...] }", ... }
+    // Fallbacks:
+    // - data.recommendations (if middleware parsed already)
+    // - try parse entire data if it is a string
+    let rawRecs: RawRecommendation[] = [];
+    try {
+      const data = ollamaResponse?.data;
+      if (data && typeof data.response === 'string') {
+        const parsed = JSON.parse(data.response);
+        rawRecs = Array.isArray(parsed?.recommendations) ? parsed.recommendations : [];
+        Logger.debug({ parsedCount: rawRecs.length }, 'Recommendations: parsed from data.response');
+      } else if (Array.isArray(data?.recommendations)) {
+        rawRecs = data.recommendations;
+        Logger.debug({ parsedCount: rawRecs.length }, 'Recommendations: parsed from data.recommendations');
+      } else if (typeof data === 'string') {
+        const parsed = JSON.parse(data);
+        rawRecs = Array.isArray(parsed?.recommendations) ? parsed.recommendations : [];
+        Logger.debug({ parsedCount: rawRecs.length }, 'Recommendations: parsed from string data');
+      } else {
+        Logger.warn({ sample: JSON.stringify(data)?.slice(0, 200) }, 'Recommendations: unexpected Ollama response shape');
+      }
+    } catch (parseErr: any) {
+      Logger.error({ err: parseErr?.message, sample: JSON.stringify(ollamaResponse?.data)?.slice(0, 200) }, 'Recommendations: failed to parse Ollama response');
+      rawRecs = [];
+    }
+
+    if (!Array.isArray(rawRecs) || rawRecs.length === 0) {
+      Logger.warn({ userId, userQuery }, 'Recommendations: no raw recommendations from Ollama');
+      return [];
+    }
+    Logger.debug({ rawCount: rawRecs.length }, 'Recommendations: raw recommendations received');
+
+    const tmdbKey = this.config.get<string>('TMDB_API_KEY') || '';
+    if (!tmdbKey) {
+      Logger.warn('Recommendations: TMDB_API_KEY not set, returning raw items with tmdbId=0');
+      const minimal = rawRecs.map((rec) => ({ ...rec, tmdbId: 0 })) as EnrichedRecommendation[];
+      Logger.debug({ returnedCount: minimal.length }, 'Recommendations: returning minimal recommendations');
+      return minimal;
+    }
 
     const enriched: EnrichedRecommendation[] = (
       await Promise.all(
         rawRecs.map(async (rec) => {
           try {
             const tmdb = await this.findOnTmdb(rec.title, rec.year);
-            if (!tmdb) return null;
+            if (!tmdb) {
+              Logger.debug({ title: rec.title, year: rec.year }, 'Recommendations: TMDB match not found');
+              return null;
+            }
             return { ...rec, tmdbId: tmdb.id, posterPath: tmdb.poster_path, overview: tmdb.overview } as EnrichedRecommendation;
           } catch (error: any) {
             Logger.warn({ err: error?.message, title: rec.title, year: rec.year }, 'TMDB enrichment failed');
@@ -76,6 +128,8 @@ export class RecommendationsService {
         }),
       )
     ).filter(Boolean) as EnrichedRecommendation[];
+
+    Logger.debug({ enrichedCount: enriched.length }, 'Recommendations: enriched recommendations count');
 
     return enriched;
   }
@@ -92,10 +146,18 @@ export class RecommendationsService {
 
   private async findOnTmdb(title: string, year?: number): Promise<any | null> {
     const tmdbKey = this.config.get<string>('TMDB_API_KEY') || '';
+    const tmdbBearer = this.config.get<string>('TMDB_BEARER_TOKEN') || '';
     const base = 'https://api.themoviedb.org/3';
-    const searchUrl = `${base}/search/movie?api_key=${tmdbKey}&query=${encodeURIComponent(title)}${year ? `&year=${year}` : ''}`;
+    const useBearer = Boolean(tmdbBearer);
+    Logger.debug({ useBearer }, 'TMDB: auth method');
+
+    const searchUrl = useBearer
+      ? `${base}/search/movie?query=${encodeURIComponent(title)}${year ? `&year=${year}` : ''}`
+      : `${base}/search/movie?api_key=${tmdbKey}&query=${encodeURIComponent(title)}${year ? `&year=${year}` : ''}`;
+
+    const headers = useBearer ? { Authorization: `Bearer ${tmdbBearer}` } : undefined;
     try {
-      const searchResp = await firstValueFrom(this.http.get(searchUrl));
+      const searchResp = await firstValueFrom(this.http.get(searchUrl, { headers }));
       const results = Array.isArray(searchResp.data?.results) ? searchResp.data.results : [];
       if (results.length === 0) {
         Logger.debug({ title, year }, 'TMDB search returned no results');
@@ -105,8 +167,8 @@ export class RecommendationsService {
       const best = this.pickBestTmdbMatch(title, year, results);
       if (!best) return null;
 
-      const detailsUrl = `${base}/movie/${best.id}?api_key=${tmdbKey}`;
-      const detailsResp = await firstValueFrom(this.http.get(detailsUrl));
+      const detailsUrl = useBearer ? `${base}/movie/${best.id}` : `${base}/movie/${best.id}?api_key=${tmdbKey}`;
+      const detailsResp = await firstValueFrom(this.http.get(detailsUrl, { headers }));
       return detailsResp.data;
     } catch (error: any) {
       Logger.error({ err: error?.message, title, year }, 'TMDB request failed');

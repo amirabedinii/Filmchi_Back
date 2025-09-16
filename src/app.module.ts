@@ -39,6 +39,7 @@ import * as Joi from 'joi';
         REFRESH_JWT_SECRET: Joi.string().min(16).required(),
         REFRESH_JWT_EXPIRES_IN: Joi.string().default('7d'),
         TMDB_API_KEY: Joi.string().allow('').optional(),
+        TMDB_BEARER_TOKEN: Joi.string().allow('').optional(),
         OLLAMA_URL: Joi.string().uri().default('http://localhost:11434'),
         OLLAMA_MODEL: Joi.string().default('llama3.1'),
         PORT: Joi.number().default(3001),
