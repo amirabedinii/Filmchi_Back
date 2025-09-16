@@ -1,10 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, Unique, Index } from 'typeorm';
 
 @Entity('list_items')
+@Unique('UQ_list_item_movie_list_tmdb', ['movieListId', 'tmdbId'])
 export class ListItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Index()
   @Column({ name: 'tmdb_id' })
   tmdbId: number;
 

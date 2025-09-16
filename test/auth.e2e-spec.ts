@@ -33,7 +33,9 @@ describe('Auth (e2e)', () => {
         .expect(201)
         .expect((res) => {
           expect(res.body).toHaveProperty('accessToken');
+          expect(res.body).toHaveProperty('refreshToken');
           expect(res.body.accessToken).toBeDefined();
+          expect(res.body.refreshToken).toBeDefined();
         });
     });
 
@@ -65,9 +67,7 @@ describe('Auth (e2e)', () => {
         password: 'password123',
       };
 
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send(userData);
+      await request(app.getHttpServer()).post('/auth/register').send(userData);
     });
 
     it('should login successfully with valid credentials', () => {
@@ -82,7 +82,7 @@ describe('Auth (e2e)', () => {
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty('accessToken');
-          expect(res.body.accessToken).toBeDefined();
+          expect(res.body).toHaveProperty('refreshToken');
         });
     });
 
@@ -92,10 +92,48 @@ describe('Auth (e2e)', () => {
         password: 'wrongpassword',
       };
 
-      return request(app.getHttpServer())
-        .post('/auth/login')
-        .send(loginData)
+      return request(app.getHttpServer()).post('/auth/login').send(loginData).expect(401);
+    });
+
+    it('should refresh tokens and then logout', async () => {
+      const loginData = {
+        email: 'login@example.com',
+        password: 'password123',
+      };
+      const loginRes = await request(app.getHttpServer()).post('/auth/login').send(loginData).expect(200);
+      const refreshToken = loginRes.body.refreshToken as string;
+
+      const refreshRes = await request(app.getHttpServer())
+        .post('/auth/refresh')
+        .send({ refreshToken })
+        .expect(200);
+      expect(refreshRes.body).toHaveProperty('accessToken');
+      expect(refreshRes.body).toHaveProperty('refreshToken');
+
+      await request(app.getHttpServer()).post('/auth/logout').send({ refreshToken }).expect(200);
+
+      // Old refresh should no longer work
+      await request(app.getHttpServer()).post('/auth/refresh').send({ refreshToken }).expect(401);
+    });
+
+    it('should return 401 for invalid refresh token', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/refresh')
+        .send({ refreshToken: 'invalid.token.here' })
         .expect(401);
+    });
+
+    it('logout should be idempotent', async () => {
+      const loginData = {
+        email: 'login@example.com',
+        password: 'password123',
+      };
+      const loginRes = await request(app.getHttpServer()).post('/auth/login').send(loginData).expect(200);
+      const refreshToken = loginRes.body.refreshToken as string;
+
+      await request(app.getHttpServer()).post('/auth/logout').send({ refreshToken }).expect(200);
+      // Logging out again should still return success
+      await request(app.getHttpServer()).post('/auth/logout').send({ refreshToken }).expect(200);
     });
   });
 });

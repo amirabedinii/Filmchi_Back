@@ -16,4 +16,12 @@ export class User {
 
   @OneToMany('MovieList', 'user')
   movieLists: any[];
+
+  // Hashed refresh token (optional). Null when logged out or rotated.
+  @Column({ name: 'refresh_token_hash', type: 'varchar', nullable: true })
+  refreshTokenHash: string | null;
+
+  // Version to invalidate older tokens after rotation.
+  @Column({ name: 'token_version', type: 'int', default: 0 })
+  tokenVersion: number;
 }

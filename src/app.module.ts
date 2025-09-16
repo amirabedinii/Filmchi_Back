@@ -4,11 +4,37 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ListsModule } from './lists/lists.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import * as Joi from 'joi';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: (() => {
+        if (process.env.NODE_ENV === 'test') return '.env.test';
+        if (process.env.NODE_ENV === 'production') return '.env';
+        return '.env.development';
+      })(),
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
+        DATABASE_URL: Joi.when('NODE_ENV', {
+          is: Joi.valid('development', 'production'),
+          then: Joi.string().uri({ scheme: [/postgres(ql)?/] }).required(),
+          otherwise: Joi.string().optional(),
+        }),
+        JWT_SECRET: Joi.string().min(16).required(),
+        JWT_EXPIRES_IN: Joi.string().default('1d'),
+        REFRESH_JWT_SECRET: Joi.string().min(16).required(),
+        REFRESH_JWT_EXPIRES_IN: Joi.string().default('7d'),
+        TMDB_API_KEY: Joi.string().allow('').optional(),
+        PORT: Joi.number().default(3001),
+      }),
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60_000, limit: 60 }],
     }),
     TypeOrmModule.forRootAsync({
       useFactory: async () => {
@@ -26,13 +52,20 @@ import { AuthModule } from './auth/auth.module';
           type: 'postgres',
           url: process.env.DATABASE_URL,
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          synchronize: true, // Only for development
+          synchronize: process.env.NODE_ENV !== 'production',
         } as any;
       },
     }),
     AuthModule,
+    ListsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}
