@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ListsModule } from './lists/lists.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { RecommendationsModule } from './recommendations/recommendations.module';
 import { APP_GUARD } from '@nestjs/core';
 import * as Joi from 'joi';
 
@@ -58,6 +59,7 @@ import * as Joi from 'joi';
     }),
     AuthModule,
     ListsModule,
+    RecommendationsModule,
   ],
   controllers: [AppController],
   providers: [
