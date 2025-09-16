@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { LoggerModule } from 'nestjs-pino';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -12,6 +13,13 @@ import * as Joi from 'joi';
 
 @Module({
   imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+        transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty', options: { singleLine: true } } : undefined,
+        redact: ['req.headers.authorization'],
+      },
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: (() => {
@@ -31,6 +39,8 @@ import * as Joi from 'joi';
         REFRESH_JWT_SECRET: Joi.string().min(16).required(),
         REFRESH_JWT_EXPIRES_IN: Joi.string().default('7d'),
         TMDB_API_KEY: Joi.string().allow('').optional(),
+        OLLAMA_URL: Joi.string().uri().default('http://localhost:11434'),
+        OLLAMA_MODEL: Joi.string().default('llama3.1'),
         PORT: Joi.number().default(3001),
       }),
     }),

@@ -21,15 +21,38 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Filmchi API
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Filmchi is a NestJS backend that provides authentication, personal movie lists, and AI-powered movie recommendations enriched with TMDB metadata.
 
 ## Project setup
 
 ```bash
 $ yarn install
 ```
+
+## Environment
+
+Set environment variables via `.env.development` (used by default), `.env.test` (tests), or `.env` (production):
+
+```
+NODE_ENV=development
+DATABASE_URL=postgres://user:pass@localhost:5432/filmchi
+JWT_SECRET=replace-with-16+chars
+JWT_EXPIRES_IN=1d
+REFRESH_JWT_SECRET=replace-with-16+chars
+REFRESH_JWT_EXPIRES_IN=7d
+TMDB_API_KEY=your_tmdb_key
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.1
+PORT=3001
+CORS_ORIGIN=http://localhost:3000
+```
+
+Notes:
+- In tests, an in-memory sqlite database is used automatically.
+- `TMDB_API_KEY` can be empty; recommendations enrichment will then simply skip TMDB.
+- `OLLAMA_URL` is required for recommendations generation.
 
 ## Compile and run the project
 
@@ -44,6 +67,8 @@ $ yarn run start:dev
 $ yarn run start:prod
 ```
 
+API docs are available at `/docs` (Swagger).
+
 ## Run tests
 
 ```bash
@@ -57,42 +82,51 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
+## Logging
+
+This service uses structured logging via `nestjs-pino`:
+- In development: pretty printing is enabled.
+- In production: JSON logs at level `info`.
+
+Sensitive headers like `Authorization` are redacted. You can adjust log level via `NODE_ENV`.
+
+## Recommendations
+
+Endpoint: `POST /recommendations` (JWT required)
+
+Body:
+
+```
+{ "query": "smart sci-fi" }
+```
+
+Behavior:
+- Generates 5–8 raw suggestions using Ollama at `OLLAMA_URL`.
+- Enriches suggestions from TMDB in parallel using `Promise.all` for performance.
+- Matching algorithm considers title similarity (Levenshtein), release year proximity, and popularity; single-result searches are accepted directly.
+- Error handling: failed or empty TMDB lookups are filtered out; errors are logged but do not fail the request.
+
+Returned items include: `title`, `year?`, `reason`, `tmdbId`, `posterPath?`, `overview?`.
+
+## Auth and Lists
+
+- Auth endpoints under `/auth` provide registration, login, and token-based auth.
+- Lists under `/lists` support `watched` and `watchlist` with pagination.
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Ensure environment variables are configured. Run `yarn build` then `yarn start:prod`.
 
 ## Resources
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- NestJS docs: https://docs.nestjs.com
 
 ## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Nest is an MIT-licensed open source project.
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT
