@@ -6,6 +6,7 @@ import { AxiosResponse } from 'axios';
 import { RecommendationsService } from './recommendations.service';
 import { ListsService } from '../lists/lists.service';
 import { LLMService } from '../llm/services/llm.service';
+import { TmdbService } from '../movies/tmdb.service';
 
 class ListsServiceMock {
   getMoviesForList = jest.fn();
@@ -21,6 +22,7 @@ describe('RecommendationsService', () => {
   let llmService: LLMServiceMock;
   let httpService: jest.Mocked<HttpService>;
   let configService: ConfigService;
+  let tmdbService: jest.Mocked<TmdbService>;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -28,6 +30,7 @@ describe('RecommendationsService', () => {
         RecommendationsService,
         { provide: ListsService, useClass: ListsServiceMock },
         { provide: LLMService, useClass: LLMServiceMock },
+        { provide: TmdbService, useValue: { searchMovie: jest.fn(), getMovieDetails: jest.fn(), hasAuthConfigured: jest.fn().mockReturnValue(true) } },
         {
           provide: HttpService,
           useValue: {
@@ -54,6 +57,7 @@ describe('RecommendationsService', () => {
     llmService = moduleRef.get(LLMService);
     httpService = moduleRef.get(HttpService);
     configService = moduleRef.get(ConfigService);
+    tmdbService = moduleRef.get(TmdbService) as any;
   });
 
   it('fetches watched and watchlist history from ListsService', async () => {
@@ -117,16 +121,9 @@ describe('RecommendationsService', () => {
       ],
     });
 
-    // TMDB search -> id
-    (httpService.get as jest.Mock)
-      // search
-      .mockReturnValueOnce(of({ data: { results: [{ id: 27205 }] } } as any))
-      // movie details
-      .mockReturnValueOnce(
-        of({
-          data: { id: 27205, poster_path: '/x.jpg', overview: 'desc' },
-        } as any),
-      );
+    // TMDB search -> id and details via wrapper
+    (tmdbService.searchMovie as jest.Mock).mockResolvedValueOnce({ results: [{ id: 27205 }] });
+    (tmdbService.getMovieDetails as jest.Mock).mockResolvedValueOnce({ id: 27205, poster_path: '/x.jpg', overview: 'desc' });
 
     const res = await service.getRecommendations(
       'user-1',
@@ -154,9 +151,7 @@ describe('RecommendationsService', () => {
     });
 
     // TMDB search returns empty
-    (httpService.get as jest.Mock).mockReturnValueOnce(
-      of({ data: { results: [] } } as any),
-    );
+    (tmdbService.searchMovie as jest.Mock).mockResolvedValueOnce({ results: [] });
 
     const res = await service.getRecommendations('user-1', 'anything');
     expect(res).toEqual([]);
@@ -174,12 +169,8 @@ describe('RecommendationsService', () => {
   });
 
   it('returns minimal items when TMDB_API_KEY missing', async () => {
-    // Override config to remove TMDB key
-    const cfg = configService as any;
-    jest.spyOn(cfg, 'get').mockImplementation((key: string) => {
-      if (key === 'TMDB_API_KEY') return '';
-      return undefined;
-    });
+    // Simulate missing TMDB auth
+    (tmdbService.hasAuthConfigured as jest.Mock).mockReturnValueOnce(false);
 
     listsService.getMoviesForList.mockResolvedValueOnce([]);
     listsService.getMoviesForList.mockResolvedValueOnce([]);
@@ -198,13 +189,7 @@ describe('RecommendationsService', () => {
   });
 
   it('uses bearer token path for TMDB when provided and handles TMDB error gracefully', async () => {
-    // Configure bearer token
-    const cfg = configService as any;
-    jest.spyOn(cfg, 'get').mockImplementation((key: string) => {
-      if (key === 'TMDB_API_KEY') return 'ignored_when_bearer_present';
-      if (key === 'TMDB_BEARER_TOKEN') return 'bearer123';
-      return undefined;
-    });
+    // Leave auth configured; simulate details failure
 
     listsService.getMoviesForList.mockResolvedValueOnce([]);
     listsService.getMoviesForList.mockResolvedValueOnce([]);
@@ -215,12 +200,8 @@ describe('RecommendationsService', () => {
     });
 
     // Simulate TMDB search success, details throws to exercise catch
-    (httpService.get as jest.Mock).mockReturnValueOnce(
-      of({ data: { results: [{ id: 1, title: 'X', release_date: '2015-01-01' }] } } as any),
-    );
-    (httpService.get as jest.Mock).mockImplementationOnce(() => {
-      throw new Error('TMDB details failure');
-    });
+    (tmdbService.searchMovie as jest.Mock).mockResolvedValueOnce({ results: [{ id: 1, title: 'X', release_date: '2015-01-01' }] });
+    (tmdbService.getMovieDetails as jest.Mock).mockRejectedValueOnce(new Error('TMDB details failure'));
 
     const res = await service.getRecommendations('user-1', 'q');
     // Because details returned null-ish, enrichment returns null and gets filtered -> []
@@ -244,9 +225,7 @@ describe('RecommendationsService', () => {
     });
 
     // First TMDB call throws
-    (httpService.get as jest.Mock).mockImplementationOnce(() => {
-      throw new Error('search fail');
-    });
+    (tmdbService.searchMovie as jest.Mock).mockRejectedValueOnce(new Error('search fail'));
 
     const res = await service.getRecommendations('user-1', 'q');
     expect(res).toEqual([]);

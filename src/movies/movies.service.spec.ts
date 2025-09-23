@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { MovieRating } from '../entities/movie-rating.entity';
 import { of } from 'rxjs';
+import { TmdbService } from './tmdb.service';
 
 describe('MoviesService', () => {
   let service: MoviesService;
@@ -17,6 +18,9 @@ describe('MoviesService', () => {
     create: jest.fn((x) => x),
     save: jest.fn((x) => ({ ...x })),
   };
+  const tmdbMock = {
+    get: jest.fn(),
+  } as any as TmdbService;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -24,6 +28,7 @@ describe('MoviesService', () => {
         MoviesService,
         { provide: HttpService, useValue: httpMock },
         { provide: ConfigService, useValue: configMock },
+        { provide: TmdbService, useValue: tmdbMock },
         { provide: getRepositoryToken(MovieRating), useValue: repoMock },
       ],
     }).compile();
@@ -33,15 +38,17 @@ describe('MoviesService', () => {
   });
 
   it('searchMovies builds bearer request', async () => {
-    (httpMock.get as any).mockReturnValueOnce(of({ data: { results: [] } }));
+    (tmdbMock.get as any).mockResolvedValueOnce({ results: [] });
     const res = await service.searchMovies({ query: 'Matrix', page: 1 });
     expect(res).toEqual({ results: [] });
+    expect(tmdbMock.get).toHaveBeenCalledWith('/search/movie', expect.any(Object));
   });
 
   it('getMovieDetails returns data', async () => {
-    (httpMock.get as any).mockReturnValueOnce(of({ data: { id: 1 } }));
+    (tmdbMock.get as any).mockResolvedValueOnce({ id: 1 });
     const res = await service.getMovieDetails(1);
     expect(res.id).toBe(1);
+    expect(tmdbMock.get).toHaveBeenCalledWith('/movie/1');
   });
 
   it('setUserRating creates or updates', async () => {

@@ -5,9 +5,10 @@ import { MoviesService } from './movies.service';
 import { MoviesController } from './movies.controller';
 import { MovieRating } from '../entities/movie-rating.entity';
 import { ListsModule } from '../lists/lists.module';
+import { TmdbModule } from './tmdb.module';
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([MovieRating]), ListsModule],
+  imports: [HttpModule, TypeOrmModule.forFeature([MovieRating]), ListsModule, TmdbModule],
   controllers: [MoviesController],
   providers: [MoviesService],
 })

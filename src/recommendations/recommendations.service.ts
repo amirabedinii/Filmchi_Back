@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { ListsService } from '../lists/lists.service';
 import { LLMService } from '../llm/services/llm.service';
+import { TmdbService } from '../movies/tmdb.service';
 
 type RawRecommendation = { title: string; year?: number; reason: string };
 
@@ -20,6 +21,7 @@ export class RecommendationsService {
     private readonly config: ConfigService,
     private readonly listsService: ListsService,
     private readonly llmService: LLMService,
+    private readonly tmdb: TmdbService,
   ) {}
 
   async getRecommendations(
@@ -77,10 +79,9 @@ export class RecommendationsService {
       return [];
     }
 
-    const tmdbKey = this.config.get<string>('TMDB_API_KEY') || '';
-    if (!tmdbKey) {
+    if (!this.tmdb.hasAuthConfigured()) {
       Logger.warn(
-        'Recommendations: TMDB_API_KEY not set, returning raw items with tmdbId=0',
+        'Recommendations: TMDB auth not set, returning raw items with tmdbId=0',
       );
       const minimal = rawRecs.map((rec) => ({
         ...rec,
@@ -131,25 +132,10 @@ export class RecommendationsService {
   }
 
   private async findOnTmdb(title: string, year?: number): Promise<any | null> {
-    const tmdbKey = this.config.get<string>('TMDB_API_KEY') || '';
-    const tmdbBearer = this.config.get<string>('TMDB_BEARER_TOKEN') || '';
-    const base = 'https://api.themoviedb.org/3';
-    const useBearer = Boolean(tmdbBearer);
-    Logger.debug({ useBearer }, 'TMDB: auth method');
-
-    const searchUrl = useBearer
-      ? `${base}/search/movie?query=${encodeURIComponent(title)}${year ? `&year=${year}` : ''}`
-      : `${base}/search/movie?api_key=${tmdbKey}&query=${encodeURIComponent(title)}${year ? `&year=${year}` : ''}`;
-
-    const headers = useBearer
-      ? { Authorization: `Bearer ${tmdbBearer}` }
-      : undefined;
     try {
-      const searchResp = await firstValueFrom(
-        this.http.get(searchUrl, { headers }),
-      );
-      const results = Array.isArray(searchResp.data?.results)
-        ? searchResp.data.results
+      const searchResp = await this.tmdb.searchMovie(title, year);
+      const results = Array.isArray(searchResp?.results)
+        ? searchResp.results
         : [];
       if (results.length === 0) {
         Logger.debug({ title, year }, 'TMDB search returned no results');
@@ -158,14 +144,8 @@ export class RecommendationsService {
 
       const best = this.pickBestTmdbMatch(title, year, results);
       if (!best) return null;
-
-      const detailsUrl = useBearer
-        ? `${base}/movie/${best.id}`
-        : `${base}/movie/${best.id}?api_key=${tmdbKey}`;
-      const detailsResp = await firstValueFrom(
-        this.http.get(detailsUrl, { headers }),
-      );
-      return detailsResp.data;
+      const detailsResp = await this.tmdb.getMovieDetails(best.id);
+      return detailsResp;
     } catch (error: any) {
       Logger.error({ err: error?.message, title, year }, 'TMDB request failed');
       return null;
