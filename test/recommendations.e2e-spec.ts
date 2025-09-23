@@ -4,6 +4,7 @@ import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { HttpService } from '@nestjs/axios';
 import { of } from 'rxjs';
+import { LLMService } from '../src/llm/services/llm.service';
 
 describe('Recommendations (e2e)', () => {
   let app: INestApplication;
@@ -36,6 +37,14 @@ describe('Recommendations (e2e)', () => {
               data: { id: 27205, poster_path: '/x.jpg', overview: 'desc' },
             } as any),
           ),
+      })
+      .overrideProvider(LLMService)
+      .useValue({
+        generateMovieRecommendations: jest.fn().mockResolvedValue({
+          recommendations: [
+            { title: 'Inception', year: 2010, reason: 'mind-bending' },
+          ],
+        }),
       })
       .compile();
 

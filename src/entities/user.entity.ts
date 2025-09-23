@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 
 @Entity('users')
@@ -30,4 +31,42 @@ export class User {
   // Version to invalidate older tokens after rotation.
   @Column({ name: 'token_version', type: 'int', default: 0 })
   tokenVersion: number;
+
+  // Profile fields
+  @Column({ name: 'display_name', type: 'varchar', nullable: true })
+  displayName: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  bio: string | null;
+
+  @Column({ type: 'varchar', length: 120, nullable: true })
+  location: string | null;
+
+  @Column({ name: 'avatar_url', type: 'varchar', nullable: true })
+  avatarUrl: string | null;
+
+  // Preferences and interests (JSON for flexibility)
+  @Column({ name: 'favorite_genres', type: 'simple-json', nullable: true })
+  favoriteGenres: string[] | null;
+
+  @Column({ name: 'favorite_directors', type: 'simple-json', nullable: true })
+  favoriteDirectors: string[] | null;
+
+  @Column({ name: 'favorite_actors', type: 'simple-json', nullable: true })
+  favoriteActors: string[] | null;
+
+  // Privacy and account preferences
+  @Column({ name: 'privacy_settings', type: 'simple-json', nullable: true })
+  privacySettings: Record<string, any> | null;
+
+  @Column({ name: 'account_preferences', type: 'simple-json', nullable: true })
+  accountPreferences: Record<string, any> | null;
+
+  // Activity status
+  @Column({ name: 'activity_status', type: 'varchar', default: 'active' })
+  activityStatus: string;
+
+  // Soft delete support
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt?: Date | null;
 }

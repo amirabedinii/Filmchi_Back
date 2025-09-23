@@ -46,6 +46,19 @@ $ yarn run start:prod
 
 API docs are available at `/docs` (Swagger).
 
+### Users (JWT required)
+
+Base path: `/users`
+
+- `GET /users/profile`: Get current user's profile.
+- `PUT /users/profile`: Update profile fields (e.g. `displayName`, `bio`, `location`, `avatarUrl`, favorites arrays).
+- `GET /users/stats`: Get counts of lists and items.
+- `PUT /users/preferences`: Update arbitrary account preferences object.
+- `PUT /users/privacy`: Update privacy settings object.
+- `PUT /users/activity`: Set activity status (e.g. `{ "status": "active" }`).
+- `GET /users/export`: Export user's data snapshot.
+- `DELETE /users/account`: Soft delete account (can be restored by admin).
+
 ## Run tests
 
 ```bash
