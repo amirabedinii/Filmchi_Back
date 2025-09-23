@@ -9,6 +9,7 @@ import { ListsModule } from './lists/lists.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { RecommendationsModule } from './recommendations/recommendations.module';
 import { UsersModule } from './users/users.module';
+import { MoviesModule } from './movies/movies.module';
 import { APP_GUARD } from '@nestjs/core';
 import * as Joi from 'joi';
 
@@ -86,6 +87,7 @@ import * as Joi from 'joi';
     ListsModule,
     RecommendationsModule,
     UsersModule,
+    MoviesModule,
   ],
   controllers: [AppController],
   providers: [

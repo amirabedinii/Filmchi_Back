@@ -53,6 +53,21 @@
       ]
     },
     {
+      "name": "Movies",
+      "item": [
+        { "name": "GET /movies/search", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/search?q=Matrix&page=1", "host": ["{{baseUrl}}"], "path": ["movies", "search"], "query": [ {"key":"q","value":"Matrix"}, {"key":"page","value":"1"} ] } }, "response": [] },
+        { "name": "GET /movies/:tmdbId", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/{{tmdbId}}", "host": ["{{baseUrl}}"], "path": ["movies", "{{tmdbId}}"] } }, "response": [] },
+        { "name": "GET /movies/trending", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/trending", "host": ["{{baseUrl}}"], "path": ["movies", "trending"] } }, "response": [] },
+        { "name": "GET /movies/popular", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/popular", "host": ["{{baseUrl}}"], "path": ["movies", "popular"] } }, "response": [] },
+        { "name": "GET /movies/top-rated", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/top-rated", "host": ["{{baseUrl}}"], "path": ["movies", "top-rated"] } }, "response": [] },
+        { "name": "GET /movies/now-playing", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/now-playing", "host": ["{{baseUrl}}"], "path": ["movies", "now-playing"] } }, "response": [] },
+        { "name": "GET /movies/upcoming", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/upcoming", "host": ["{{baseUrl}}"], "path": ["movies", "upcoming"] } }, "response": [] },
+        { "name": "GET /movies/:tmdbId/similar", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/{{tmdbId}}/similar", "host": ["{{baseUrl}}"], "path": ["movies", "{{tmdbId}}", "similar"] } }, "response": [] },
+        { "name": "POST /movies/:tmdbId/bookmark (Protected)", "request": { "method": "POST", "header": [ {"key":"Content-Type","value":"application/json"} ], "body": { "mode": "raw", "raw": "{\n  \"title\": \"The Matrix\"\n}" }, "url": { "raw": "{{baseUrl}}/movies/{{tmdbId}}/bookmark", "host": ["{{baseUrl}}"], "path": ["movies", "{{tmdbId}}", "bookmark"] } }, "response": [] },
+        { "name": "POST /movies/:tmdbId/rating (Protected)", "request": { "method": "POST", "header": [ {"key":"Content-Type","value":"application/json"} ], "body": { "mode": "raw", "raw": "{\n  \"rating\": 8\n}" }, "url": { "raw": "{{baseUrl}}/movies/{{tmdbId}}/rating", "host": ["{{baseUrl}}"], "path": ["movies", "{{tmdbId}}", "rating"] } }, "response": [] }
+      ]
+    },
+    {
       "name": "Auth",
       "item": [
         {

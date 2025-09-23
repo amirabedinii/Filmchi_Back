@@ -29,6 +29,7 @@ CORS_ORIGIN=http://localhost:3000
 Notes:
 - In tests, an in-memory sqlite database is used automatically.
 - `TMDB_API_KEY` can be empty; recommendations enrichment will then simply skip TMDB.
+- Optionally set `TMDB_BEARER_TOKEN` to use TMDB v4 bearer auth (preferred). If present, it takes precedence over `TMDB_API_KEY`.
 - `OLLAMA_URL` is required for recommendations generation.
 
 ## Compile and run the project
@@ -120,6 +121,26 @@ Behavior:
 - Error handling: failed or empty TMDB lookups are filtered out; errors are logged but do not fail the request.
 
 Returned items include: `title`, `year?`, `reason`, `tmdbId`, `posterPath?`, `overview?`.
+
+### Movies
+
+Base path: `/movies`
+
+- GET `/movies/search` — Search movies.
+  - Query: `q` (title), `year?`, `with_genres?`, `sort_by?`, `page?=1`
+- GET `/movies/:tmdbId` — Movie details by TMDB id.
+- GET `/movies/trending` — Trending (weekly).
+- GET `/movies/popular` — Popular.
+- GET `/movies/top-rated` — Top rated.
+- GET `/movies/now-playing` — Now playing.
+- GET `/movies/upcoming` — Upcoming.
+- GET `/movies/:tmdbId/similar` — Similar titles.
+- POST `/movies/:tmdbId/bookmark` — Auth required. Body: `{ title: string }`. Adds to `favorites` list (uses the same storage model as other lists; stores TMDB id).
+- POST `/movies/:tmdbId/rating` — Auth required. Body: `{ rating: 1..10 }`. Upserts a per‑user rating by `tmdbId`.
+
+Notes:
+- We keep and operate on TMDB ids for all movie references. No local movie table is required.
+- When `TMDB_BEARER_TOKEN` is configured, all TMDB requests use bearer headers; otherwise `TMDB_API_KEY` is appended as a query param.
 
 ## Architecture
 
