@@ -8,5 +8,3 @@ export class AddMovieDto {
   @IsNotEmpty()
   title: string;
 }
-
-

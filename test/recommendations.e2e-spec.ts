@@ -15,13 +15,27 @@ describe('Recommendations (e2e)', () => {
     })
       .overrideProvider(HttpService)
       .useValue({
-        post: jest.fn(() => of({ data: { recommendations: [{ title: 'Inception', year: 2010, reason: 'mind-bending' }] } } as any)),
+        post: jest.fn(() =>
+          of({
+            data: {
+              recommendations: [
+                { title: 'Inception', year: 2010, reason: 'mind-bending' },
+              ],
+            },
+          } as any),
+        ),
         get: jest
           .fn()
           // TMDB search
-          .mockReturnValueOnce(of({ data: { results: [{ id: 27205 }] } } as any))
+          .mockReturnValueOnce(
+            of({ data: { results: [{ id: 27205 }] } } as any),
+          )
           // TMDB details
-          .mockReturnValueOnce(of({ data: { id: 27205, poster_path: '/x.jpg', overview: 'desc' } } as any)),
+          .mockReturnValueOnce(
+            of({
+              data: { id: 27205, poster_path: '/x.jpg', overview: 'desc' },
+            } as any),
+          ),
       })
       .compile();
 
@@ -48,7 +62,10 @@ describe('Recommendations (e2e)', () => {
   });
 
   it('should require auth', async () => {
-    await request(app.getHttpServer()).post('/recommendations').send({ query: 'space' }).expect(401);
+    await request(app.getHttpServer())
+      .post('/recommendations')
+      .send({ query: 'space' })
+      .expect(401);
   });
 
   it('should return enriched recommendations with token', async () => {
@@ -64,5 +81,3 @@ describe('Recommendations (e2e)', () => {
       });
   });
 });
-
-

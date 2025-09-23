@@ -12,5 +12,3 @@ import { ListItem } from '../entities/list-item.entity';
   exports: [ListsService],
 })
 export class ListsModule {}
-
-

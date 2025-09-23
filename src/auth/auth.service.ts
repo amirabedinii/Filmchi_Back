@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -26,16 +30,24 @@ export class AuthService {
 
   private async signRefreshToken(user: User): Promise<string> {
     const payload: any = { sub: user.id, tv: user.tokenVersion };
-    const secret = this.configService.get<string>('REFRESH_JWT_SECRET')! as jwt.Secret;
-    const expiresIn = (this.configService.get<string>('REFRESH_JWT_EXPIRES_IN') || '7d') as jwt.SignOptions['expiresIn'];
+    const secret = this.configService.get<string>(
+      'REFRESH_JWT_SECRET',
+    )! as jwt.Secret;
+    const expiresIn = (this.configService.get<string>(
+      'REFRESH_JWT_EXPIRES_IN',
+    ) || '7d') as jwt.SignOptions['expiresIn'];
     return jwt.sign(payload, secret, { expiresIn });
   }
 
-  async register(registerDto: RegisterDto): Promise<{ accessToken: string; refreshToken: string }> {
+  async register(
+    registerDto: RegisterDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const { email, password } = registerDto;
 
     // Check if user already exists
-    const existingUser = await this.userRepository.findOne({ where: { email } });
+    const existingUser = await this.userRepository.findOne({
+      where: { email },
+    });
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
@@ -50,7 +62,7 @@ export class AuthService {
       passwordHash,
     });
 
-    let savedUser = await this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
 
     const accessToken = await this.signAccessToken(savedUser);
     const refreshToken = await this.signRefreshToken(savedUser);
@@ -61,7 +73,9 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async login(loginDto: LoginDto): Promise<{ accessToken: string; refreshToken: string }> {
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const { email, password } = loginDto;
 
     // Find user
@@ -83,19 +97,31 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async refresh(dto: RefreshDto): Promise<{ accessToken: string; refreshToken: string }> {
-    const secret = this.configService.get<string>('REFRESH_JWT_SECRET')! as jwt.Secret;
+  async refresh(
+    dto: RefreshDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const secret = this.configService.get<string>(
+      'REFRESH_JWT_SECRET',
+    )! as jwt.Secret;
     let decoded: any;
     try {
       decoded = jwt.verify(dto.refreshToken, secret) as any;
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
-    const user = await this.userRepository.findOne({ where: { id: decoded.sub } });
-    if (!user || typeof decoded.tv !== 'number' || decoded.tv !== user.tokenVersion) {
+    const user = await this.userRepository.findOne({
+      where: { id: decoded.sub },
+    });
+    if (
+      !user ||
+      typeof decoded.tv !== 'number' ||
+      decoded.tv !== user.tokenVersion
+    ) {
       throw new UnauthorizedException('Invalid refresh token');
     }
-    const matches = user.refreshTokenHash && (await bcrypt.compare(dto.refreshToken, user.refreshTokenHash));
+    const matches =
+      user.refreshTokenHash &&
+      (await bcrypt.compare(dto.refreshToken, user.refreshTokenHash));
     if (!matches) {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -108,10 +134,14 @@ export class AuthService {
   }
 
   async logout(dto: RefreshDto): Promise<{ success: boolean }> {
-    const secret = this.configService.get<string>('REFRESH_JWT_SECRET')! as jwt.Secret;
+    const secret = this.configService.get<string>(
+      'REFRESH_JWT_SECRET',
+    )! as jwt.Secret;
     try {
       const decoded: any = jwt.verify(dto.refreshToken, secret);
-      const user = await this.userRepository.findOne({ where: { id: decoded.sub } });
+      const user = await this.userRepository.findOne({
+        where: { id: decoded.sub },
+      });
       if (user) {
         user.refreshTokenHash = null;
         user.tokenVersion += 1;

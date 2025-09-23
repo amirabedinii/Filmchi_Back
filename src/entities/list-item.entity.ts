@@ -1,4 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, Unique, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  Unique,
+  Index,
+} from 'typeorm';
 
 @Entity('list_items')
 @Unique('UQ_list_item_movie_list_tmdb', ['movieListId', 'tmdbId'])

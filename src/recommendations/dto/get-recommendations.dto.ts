@@ -5,5 +5,3 @@ export class GetRecommendationsDto {
   @MinLength(2)
   query!: string;
 }
-
-

@@ -4,5 +4,3 @@ export class RefreshDto {
   @IsJWT()
   refreshToken: string;
 }
-
-

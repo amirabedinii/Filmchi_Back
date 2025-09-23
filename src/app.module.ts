@@ -16,7 +16,10 @@ import * as Joi from 'joi';
     LoggerModule.forRoot({
       pinoHttp: {
         level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-        transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty', options: { singleLine: true } } : undefined,
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty', options: { singleLine: true } }
+            : undefined,
         redact: ['req.headers.authorization'],
       },
     }),
@@ -28,10 +31,14 @@ import * as Joi from 'joi';
         return '.env.development';
       })(),
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
+        NODE_ENV: Joi.string()
+          .valid('development', 'test', 'production')
+          .default('development'),
         DATABASE_URL: Joi.when('NODE_ENV', {
           is: Joi.valid('development', 'production'),
-          then: Joi.string().uri({ scheme: [/postgres(ql)?/] }).required(),
+          then: Joi.string()
+            .uri({ scheme: [/postgres(ql)?/] })
+            .required(),
           otherwise: Joi.string().optional(),
         }),
         JWT_SECRET: Joi.string().min(16).required(),
@@ -41,7 +48,13 @@ import * as Joi from 'joi';
         TMDB_API_KEY: Joi.string().allow('').optional(),
         TMDB_BEARER_TOKEN: Joi.string().allow('').optional(),
         OLLAMA_URL: Joi.string().uri().default('http://localhost:11434'),
-        OLLAMA_MODEL: Joi.string().default('llama3.1'),
+        OLLAMA_MODEL: Joi.string().default('llama3.2:latest'),
+        LLM_PRIMARY_PROVIDER: Joi.string()
+          .valid('ollama', 'openai', 'anthropic', 'gemini')
+          .default('ollama'),
+        OPENAI_API_KEY: Joi.string().allow('').optional(),
+        ANTHROPIC_API_KEY: Joi.string().allow('').optional(),
+        GEMINI_API_KEY: Joi.string().allow('').optional(),
         PORT: Joi.number().default(3001),
       }),
     }),

@@ -4,12 +4,11 @@ import { ConfigModule } from '@nestjs/config';
 import { RecommendationsService } from './recommendations.service';
 import { RecommendationsController } from './recommendations.controller';
 import { ListsModule } from '../lists/lists.module';
+import { LLMModule } from '../llm/llm.module';
 
 @Module({
-  imports: [HttpModule, ConfigModule, ListsModule],
+  imports: [HttpModule, ConfigModule, ListsModule, LLMModule],
   controllers: [RecommendationsController],
   providers: [RecommendationsService],
 })
 export class RecommendationsModule {}
-
-

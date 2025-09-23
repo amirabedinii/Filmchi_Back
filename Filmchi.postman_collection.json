@@ -12,6 +12,27 @@
     { "key": "listName", "value": "watchlist" },
     { "key": "tmdbId", "value": "603" }
   ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Ensure Authorization header uses latest accessToken",
+          "const token = pm.collectionVariables.get('accessToken');",
+          "if (token) {",
+          "  pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+          "}"
+        ]
+      }
+    }
+  ],
   "item": [
     {
       "name": "Healthcheck",
@@ -75,13 +96,10 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  try {",
-                  "    const json = pm.response.json();",
-                  "    if (json.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);",
-                  "    if (json.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);",
-                  "  } catch (e) { /* ignore */ }",
-                  "}"
+                  "pm.test('Login returns 200', function () { pm.response.to.have.status(200); });",
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "if (json.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "if (json.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
                 ],
                 "type": "text/javascript"
               }
@@ -111,12 +129,9 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 200) {",
-                  "  try {",
-                  "    const json = pm.response.json();",
-                  "    if (json.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);",
-                  "  } catch (e) { /* ignore */ }",
-                  "}"
+                  "pm.test('Refresh returns 200', function () { pm.response.to.have.status(200); });",
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "if (json.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);"
                 ],
                 "type": "text/javascript"
               }
@@ -147,12 +162,6 @@
     },
     {
       "name": "Lists (Protected)",
-      "auth": {
-        "type": "bearer",
-        "bearer": [
-          { "key": "token", "value": "{{accessToken}}", "type": "string" }
-        ]
-      },
       "item": [
         {
           "name": "GET /lists/:listName",
@@ -208,12 +217,6 @@
     },
     {
       "name": "Recommendations (Protected)",
-      "auth": {
-        "type": "bearer",
-        "bearer": [
-          { "key": "token", "value": "{{accessToken}}", "type": "string" }
-        ]
-      },
       "item": [
         {
           "name": "POST /recommendations",

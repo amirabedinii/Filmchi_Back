@@ -13,7 +13,13 @@ async function bootstrap() {
     origin: process.env.CORS_ORIGIN?.split(',') ?? true,
     credentials: true,
   });
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Filmchi API')

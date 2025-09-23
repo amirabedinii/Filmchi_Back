@@ -92,7 +92,10 @@ describe('Auth (e2e)', () => {
         password: 'wrongpassword',
       };
 
-      return request(app.getHttpServer()).post('/auth/login').send(loginData).expect(401);
+      return request(app.getHttpServer())
+        .post('/auth/login')
+        .send(loginData)
+        .expect(401);
     });
 
     it('should refresh tokens and then logout', async () => {
@@ -100,7 +103,10 @@ describe('Auth (e2e)', () => {
         email: 'login@example.com',
         password: 'password123',
       };
-      const loginRes = await request(app.getHttpServer()).post('/auth/login').send(loginData).expect(200);
+      const loginRes = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send(loginData)
+        .expect(200);
       const refreshToken = loginRes.body.refreshToken as string;
 
       const refreshRes = await request(app.getHttpServer())
@@ -110,10 +116,16 @@ describe('Auth (e2e)', () => {
       expect(refreshRes.body).toHaveProperty('accessToken');
       expect(refreshRes.body).toHaveProperty('refreshToken');
 
-      await request(app.getHttpServer()).post('/auth/logout').send({ refreshToken }).expect(200);
+      await request(app.getHttpServer())
+        .post('/auth/logout')
+        .send({ refreshToken })
+        .expect(200);
 
       // Old refresh should no longer work
-      await request(app.getHttpServer()).post('/auth/refresh').send({ refreshToken }).expect(401);
+      await request(app.getHttpServer())
+        .post('/auth/refresh')
+        .send({ refreshToken })
+        .expect(401);
     });
 
     it('should return 401 for invalid refresh token', async () => {
@@ -128,12 +140,21 @@ describe('Auth (e2e)', () => {
         email: 'login@example.com',
         password: 'password123',
       };
-      const loginRes = await request(app.getHttpServer()).post('/auth/login').send(loginData).expect(200);
+      const loginRes = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send(loginData)
+        .expect(200);
       const refreshToken = loginRes.body.refreshToken as string;
 
-      await request(app.getHttpServer()).post('/auth/logout').send({ refreshToken }).expect(200);
+      await request(app.getHttpServer())
+        .post('/auth/logout')
+        .send({ refreshToken })
+        .expect(200);
       // Logging out again should still return success
-      await request(app.getHttpServer()).post('/auth/logout').send({ refreshToken }).expect(200);
+      await request(app.getHttpServer())
+        .post('/auth/logout')
+        .send({ refreshToken })
+        .expect(200);
     });
   });
 });

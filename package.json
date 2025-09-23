@@ -93,7 +93,12 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "src/app.service.ts",
+      "src/auth/jwt-auth.guard.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

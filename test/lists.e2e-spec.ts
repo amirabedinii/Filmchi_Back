@@ -43,7 +43,10 @@ describe('Lists (e2e)', () => {
     });
 
     it('should reject malformed JWT', async () => {
-      await request(app.getHttpServer()).get('/lists/watchlist').set('Authorization', 'Bearer x.y.z').expect(401);
+      await request(app.getHttpServer())
+        .get('/lists/watchlist')
+        .set('Authorization', 'Bearer x.y.z')
+        .expect(401);
     });
   });
 
@@ -99,52 +102,52 @@ describe('Lists (e2e)', () => {
         .expect(200);
       expect(res.body.find((m: any) => m.tmdbId === 202)).toBeFalsy();
     });
-  describe('GET /lists/:listName pagination and sorting', () => {
-    it('should paginate and sort results', async () => {
-      // seed some items
-      for (let i = 1; i <= 5; i++) {
-        await request(app.getHttpServer())
-          .post('/lists/custom')
+    describe('GET /lists/:listName pagination and sorting', () => {
+      it('should paginate and sort results', async () => {
+        // seed some items
+        for (let i = 1; i <= 5; i++) {
+          await request(app.getHttpServer())
+            .post('/lists/custom')
+            .set('Authorization', `Bearer ${accessToken}`)
+            .send({ tmdbId: 300 + i, title: `Movie ${i}` })
+            .expect(201);
+        }
+
+        const page1 = await request(app.getHttpServer())
+          .get('/lists/custom?limit=2&page=1&sort=addedAt:desc')
           .set('Authorization', `Bearer ${accessToken}`)
-          .send({ tmdbId: 300 + i, title: `Movie ${i}` })
-          .expect(201);
-      }
+          .expect(200);
+        expect(page1.body.length).toBe(2);
 
-      const page1 = await request(app.getHttpServer())
-        .get('/lists/custom?limit=2&page=1&sort=addedAt:desc')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(200);
-      expect(page1.body.length).toBe(2);
+        const page2 = await request(app.getHttpServer())
+          .get('/lists/custom?limit=2&page=2&sort=addedAt:desc')
+          .set('Authorization', `Bearer ${accessToken}`)
+          .expect(200);
+        expect(page2.body.length).toBe(2);
+        expect(page1.body[0].addedAt >= page1.body[1].addedAt).toBeTruthy();
+      });
 
-      const page2 = await request(app.getHttpServer())
-        .get('/lists/custom?limit=2&page=2&sort=addedAt:desc')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(200);
-      expect(page2.body.length).toBe(2);
-      expect(page1.body[0].addedAt >= page1.body[1].addedAt).toBeTruthy();
+      it('should support ascending sort', async () => {
+        const res = await request(app.getHttpServer())
+          .get('/lists/custom?limit=3&page=1&sort=addedAt:asc')
+          .set('Authorization', `Bearer ${accessToken}`)
+          .expect(200);
+        expect(res.body.length).toBeGreaterThanOrEqual(1);
+        // ascending
+        if (res.body.length >= 2) {
+          expect(res.body[0].addedAt <= res.body[1].addedAt).toBeTruthy();
+        }
+      });
+
+      it('should clamp unreasonable pagination values', async () => {
+        const res = await request(app.getHttpServer())
+          .get('/lists/custom?limit=1000&page=-5')
+          .set('Authorization', `Bearer ${accessToken}`)
+          .expect(200);
+        // Should not crash and return array
+        expect(Array.isArray(res.body)).toBe(true);
+      });
     });
-
-    it('should support ascending sort', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/lists/custom?limit=3&page=1&sort=addedAt:asc')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(200);
-      expect(res.body.length).toBeGreaterThanOrEqual(1);
-      // ascending
-      if (res.body.length >= 2) {
-        expect(res.body[0].addedAt <= res.body[1].addedAt).toBeTruthy();
-      }
-    });
-
-    it('should clamp unreasonable pagination values', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/lists/custom?limit=1000&page=-5')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(200);
-      // Should not crash and return array
-      expect(Array.isArray(res.body)).toBe(true);
-    });
-  });
 
     it('should return 404 when deleting a non-existent movie', async () => {
       await request(app.getHttpServer())
@@ -154,5 +157,3 @@ describe('Lists (e2e)', () => {
     });
   });
 });
-
-
