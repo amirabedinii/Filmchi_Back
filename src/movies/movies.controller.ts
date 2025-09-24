@@ -38,11 +38,6 @@ export class MoviesController {
     });
   }
 
-  @Get(':tmdbId')
-  async details(@Param('tmdbId') tmdbId: string) {
-    return this.movies.getMovieDetails(Number(tmdbId));
-  }
-
   @Get('trending')
   trending(@Query('page') page?: string) {
     return this.movies.getList('trending', page ? Number(page) : 1);
@@ -68,9 +63,36 @@ export class MoviesController {
     return this.movies.getList('upcoming', page ? Number(page) : 1);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('bookmarks')
+  async getUserBookmarks(
+    @CurrentUser() user: ReqUser,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.movies.getUserBookmarks(user.userId, {
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+  }
+
+  @Get(':tmdbId')
+  async details(@Param('tmdbId') tmdbId: string) {
+    return this.movies.getMovieDetails(Number(tmdbId));
+  }
+
   @Get(':tmdbId/similar')
   similar(@Param('tmdbId') tmdbId: string, @Query('page') page?: string) {
     return this.movies.getSimilar(Number(tmdbId), page ? Number(page) : 1);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':tmdbId/bookmark-status')
+  async getBookmarkStatus(
+    @CurrentUser() user: ReqUser,
+    @Param('tmdbId') tmdbId: string,
+  ) {
+    return this.movies.isMovieBookmarked(user.userId, Number(tmdbId));
   }
 
   @UseGuards(JwtAuthGuard)
@@ -78,13 +100,18 @@ export class MoviesController {
   async bookmark(
     @CurrentUser() user: ReqUser,
     @Param('tmdbId') tmdbId: string,
-    @Body('title') title: string,
+    @Body() body?: { title?: string; posterPath?: string; releaseDate?: string },
   ) {
-    // Use the generic lists system with a dedicated favorites list
-    return this.lists.addMovieToList(user.userId, 'favorites', {
-      tmdbId: Number(tmdbId),
-      title,
-    } as any);
+    return this.movies.bookmarkMovie(user.userId, Number(tmdbId), body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':tmdbId/unbookmark')
+  async unbookmark(
+    @CurrentUser() user: ReqUser,
+    @Param('tmdbId') tmdbId: string,
+  ) {
+    return this.movies.unbookmarkMovie(user.userId, Number(tmdbId));
   }
 
   @UseGuards(JwtAuthGuard)

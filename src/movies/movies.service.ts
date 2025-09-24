@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MovieRating } from '../entities/movie-rating.entity';
+import { MovieBookmark } from '../entities/movie-bookmark.entity';
 import { TmdbService } from './tmdb.service';
 
 type SearchOptions = {
@@ -23,6 +24,8 @@ export class MoviesService {
     private readonly tmdb: TmdbService,
     @InjectRepository(MovieRating)
     private readonly ratingRepo: Repository<MovieRating>,
+    @InjectRepository(MovieBookmark)
+    private readonly bookmarkRepo: Repository<MovieBookmark>,
   ) {}
 
   // Deprecated internal TMDB helpers are replaced by TmdbService
@@ -66,6 +69,84 @@ export class MoviesService {
     }
     const saved = await this.ratingRepo.save(entity);
     return { tmdbId: saved.tmdbId, rating: saved.rating };
+  }
+
+  async bookmarkMovie(userId: string, tmdbId: number, movieData?: { title?: string; posterPath?: string; releaseDate?: string }) {
+    // Check if already bookmarked
+    const existing = await this.bookmarkRepo.findOne({ where: { userId, tmdbId } });
+    if (existing) {
+      return {
+        id: existing.id,
+        tmdbId: existing.tmdbId,
+        movieTitle: existing.movieTitle,
+        moviePosterPath: existing.moviePosterPath,
+        movieReleaseDate: existing.movieReleaseDate,
+        createdAt: existing.createdAt,
+        isBookmarked: true,
+      };
+    }
+
+    // Create new bookmark
+    const bookmark = this.bookmarkRepo.create({
+      userId,
+      tmdbId,
+      movieTitle: movieData?.title || null,
+      moviePosterPath: movieData?.posterPath || null,
+      movieReleaseDate: movieData?.releaseDate || null,
+    });
+
+    const saved = await this.bookmarkRepo.save(bookmark);
+    return {
+      id: saved.id,
+      tmdbId: saved.tmdbId,
+      movieTitle: saved.movieTitle,
+      moviePosterPath: saved.moviePosterPath,
+      movieReleaseDate: saved.movieReleaseDate,
+      createdAt: saved.createdAt,
+      isBookmarked: true,
+    };
+  }
+
+  async unbookmarkMovie(userId: string, tmdbId: number) {
+    const bookmark = await this.bookmarkRepo.findOne({ where: { userId, tmdbId } });
+    if (!bookmark) {
+      return { isBookmarked: false };
+    }
+
+    await this.bookmarkRepo.delete(bookmark.id);
+    return { isBookmarked: false };
+  }
+
+  async getUserBookmarks(userId: string, options?: { page?: number; limit?: number }) {
+    const page = options?.page && options.page > 0 ? options.page : 1;
+    const limit = options?.limit && options.limit > 0 ? options.limit : 50;
+
+    const [bookmarks, total] = await this.bookmarkRepo.findAndCount({
+      where: { userId },
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      bookmarks: bookmarks.map(bookmark => ({
+        id: bookmark.id,
+        tmdbId: bookmark.tmdbId,
+        movieTitle: bookmark.movieTitle,
+        moviePosterPath: bookmark.moviePosterPath,
+        movieReleaseDate: bookmark.movieReleaseDate,
+        createdAt: bookmark.createdAt,
+      })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async isMovieBookmarked(userId: string, tmdbId: number) {
+    const bookmark = await this.bookmarkRepo.findOne({ where: { userId, tmdbId } });
+    return { isBookmarked: !!bookmark };
   }
 }
 

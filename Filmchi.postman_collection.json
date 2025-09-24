@@ -55,16 +55,222 @@
     {
       "name": "Movies",
       "item": [
-        { "name": "GET /movies/search", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/search?q=Matrix&page=1", "host": ["{{baseUrl}}"], "path": ["movies", "search"], "query": [ {"key":"q","value":"Matrix"}, {"key":"page","value":"1"} ] } }, "response": [] },
-        { "name": "GET /movies/:tmdbId", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/{{tmdbId}}", "host": ["{{baseUrl}}"], "path": ["movies", "{{tmdbId}}"] } }, "response": [] },
-        { "name": "GET /movies/trending", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/trending", "host": ["{{baseUrl}}"], "path": ["movies", "trending"] } }, "response": [] },
-        { "name": "GET /movies/popular", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/popular", "host": ["{{baseUrl}}"], "path": ["movies", "popular"] } }, "response": [] },
-        { "name": "GET /movies/top-rated", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/top-rated", "host": ["{{baseUrl}}"], "path": ["movies", "top-rated"] } }, "response": [] },
-        { "name": "GET /movies/now-playing", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/now-playing", "host": ["{{baseUrl}}"], "path": ["movies", "now-playing"] } }, "response": [] },
-        { "name": "GET /movies/upcoming", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/upcoming", "host": ["{{baseUrl}}"], "path": ["movies", "upcoming"] } }, "response": [] },
-        { "name": "GET /movies/:tmdbId/similar", "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/movies/{{tmdbId}}/similar", "host": ["{{baseUrl}}"], "path": ["movies", "{{tmdbId}}", "similar"] } }, "response": [] },
-        { "name": "POST /movies/:tmdbId/bookmark (Protected)", "request": { "method": "POST", "header": [ {"key":"Content-Type","value":"application/json"} ], "body": { "mode": "raw", "raw": "{\n  \"title\": \"The Matrix\"\n}" }, "url": { "raw": "{{baseUrl}}/movies/{{tmdbId}}/bookmark", "host": ["{{baseUrl}}"], "path": ["movies", "{{tmdbId}}", "bookmark"] } }, "response": [] },
-        { "name": "POST /movies/:tmdbId/rating (Protected)", "request": { "method": "POST", "header": [ {"key":"Content-Type","value":"application/json"} ], "body": { "mode": "raw", "raw": "{\n  \"rating\": 8\n}" }, "url": { "raw": "{{baseUrl}}/movies/{{tmdbId}}/rating", "host": ["{{baseUrl}}"], "path": ["movies", "{{tmdbId}}", "rating"] } }, "response": [] }
+        {
+          "name": "GET /movies/search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/search?q=Matrix&page=1&year=1999&with_genres=28&sort_by=popularity.desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "search"],
+              "query": [
+                {"key": "q", "value": "Matrix"},
+                {"key": "page", "value": "1"},
+                {"key": "year", "value": "1999"},
+                {"key": "with_genres", "value": "28"},
+                {"key": "sort_by", "value": "popularity.desc"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/:tmdbId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/trending",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/trending?page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "trending"],
+              "query": [
+                {"key": "page", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/popular",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/popular?page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "popular"],
+              "query": [
+                {"key": "page", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/top-rated",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/top-rated?page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "top-rated"],
+              "query": [
+                {"key": "page", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/now-playing",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/now-playing?page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "now-playing"],
+              "query": [
+                {"key": "page", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/upcoming",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/upcoming?page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "upcoming"],
+              "query": [
+                {"key": "page", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/:tmdbId/similar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}/similar?page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}", "similar"],
+              "query": [
+                {"key": "page", "value": "1"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /movies/:tmdbId/bookmark (Protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Matrix\",\n  \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\",\n  \"releaseDate\": \"1999-03-30\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}/bookmark",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}", "bookmark"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /movies/:tmdbId/unbookmark (Protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}/unbookmark",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}", "unbookmark"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/bookmarks (Protected)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/bookmarks?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "bookmarks"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/:tmdbId/bookmark-status (Protected)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}/bookmark-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}", "bookmark-status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /movies/:tmdbId/rating (Protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}/rating",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}", "rating"]
+            }
+          },
+          "response": []
+        }
       ]
     },
     {
@@ -75,7 +281,7 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {"key": "Content-Type", "value": "application/json"}
             ],
             "body": {
               "mode": "raw",
@@ -94,7 +300,7 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {"key": "Content-Type", "value": "application/json"}
             ],
             "body": {
               "mode": "raw",
@@ -127,7 +333,7 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {"key": "Content-Type", "value": "application/json"}
             ],
             "body": {
               "mode": "raw",
@@ -159,7 +365,7 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {"key": "Content-Type", "value": "application/json"}
             ],
             "body": {
               "mode": "raw",
@@ -188,9 +394,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["lists", "{{listName}}"],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "50" },
-                { "key": "sort", "value": "addedAt:desc" }
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "50"},
+                {"key": "sort", "value": "addedAt:desc"}
               ]
             }
           },
@@ -201,7 +407,7 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {"key": "Content-Type", "value": "application/json"}
             ],
             "body": {
               "mode": "raw",
@@ -238,11 +444,11 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {"key": "Content-Type", "value": "application/json"}
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"query\": \"sci-fi\"\n}"
+              "raw": "{\n  \"query\": \"sci-fi movies with time travel\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/recommendations",
@@ -262,7 +468,11 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/users/profile", "host": ["{{baseUrl}}"], "path": ["users", "profile"] }
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile"]
+            }
           },
           "response": []
         },
@@ -270,12 +480,18 @@
           "name": "PUT /users/profile",
           "request": {
             "method": "PUT",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"displayName\": \"Filmchi User\"\n}"
+              "raw": "{\n  \"displayName\": \"Filmchi User\",\n  \"bio\": \"Movie enthusiast\",\n  \"location\": \"New York\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\",\n  \"favoriteGenres\": [\"Action\", \"Sci-Fi\"],\n  \"favoriteDirectors\": [\"Christopher Nolan\"],\n  \"favoriteActors\": [\"Leonardo DiCaprio\"]\n}"
             },
-            "url": { "raw": "{{baseUrl}}/users/profile", "host": ["{{baseUrl}}"], "path": ["users", "profile"] }
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile"]
+            }
           },
           "response": []
         },
@@ -284,7 +500,11 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/users/stats", "host": ["{{baseUrl}}"], "path": ["users", "stats"] }
+            "url": {
+              "raw": "{{baseUrl}}/users/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "stats"]
+            }
           },
           "response": []
         },
@@ -292,9 +512,18 @@
           "name": "PUT /users/preferences",
           "request": {
             "method": "PUT",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
-            "body": { "mode": "raw", "raw": "{\n  \"preferences\": { \n    \"theme\": \"dark\"\n  }\n}" },
-            "url": { "raw": "{{baseUrl}}/users/preferences", "host": ["{{baseUrl}}"], "path": ["users", "preferences"] }
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferences\": {\n    \"theme\": \"dark\",\n    \"language\": \"en\",\n    \"notifications\": {\n      \"email\": true,\n      \"push\": false\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/preferences",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "preferences"]
+            }
           },
           "response": []
         },
@@ -302,9 +531,18 @@
           "name": "PUT /users/privacy",
           "request": {
             "method": "PUT",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
-            "body": { "mode": "raw", "raw": "{\n  \"privacy\": { \n    \"profileVisible\": true\n  }\n}" },
-            "url": { "raw": "{{baseUrl}}/users/privacy", "host": ["{{baseUrl}}"], "path": ["users", "privacy"] }
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"privacy\": {\n    \"profileVisible\": true,\n    \"activityVisible\": false,\n    \"listsVisible\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/privacy",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "privacy"]
+            }
           },
           "response": []
         },
@@ -312,9 +550,18 @@
           "name": "PUT /users/activity",
           "request": {
             "method": "PUT",
-            "header": [ { "key": "Content-Type", "value": "application/json" } ],
-            "body": { "mode": "raw", "raw": "{\n  \"status\": \"active\"\n}" },
-            "url": { "raw": "{{baseUrl}}/users/activity", "host": ["{{baseUrl}}"], "path": ["users", "activity"] }
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/activity",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "activity"]
+            }
           },
           "response": []
         },
@@ -323,7 +570,11 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/users/export", "host": ["{{baseUrl}}"], "path": ["users", "export"] }
+            "url": {
+              "raw": "{{baseUrl}}/users/export",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "export"]
+            }
           },
           "response": []
         },
@@ -332,7 +583,11 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/users/account", "host": ["{{baseUrl}}"], "path": ["users", "account"] }
+            "url": {
+              "raw": "{{baseUrl}}/users/account",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "account"]
+            }
           },
           "response": []
         }
