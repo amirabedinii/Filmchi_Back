@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { ListsService } from '../lists/lists.service';
 import { LLMService } from '../llm/services/llm.service';
 import { TmdbService } from '../movies/tmdb.service';
+import { filterMoviesWithPoster } from '../movies/utils/movie-filter.util';
 
 type RawRecommendation = { title: string; year?: number; reason: string };
 
@@ -128,7 +129,15 @@ export class RecommendationsService {
       'Recommendations: enriched recommendations count',
     );
 
-    return enriched;
+    // Filter out recommendations with null poster_path
+    const filteredRecommendations = filterMoviesWithPoster(enriched);
+    
+    Logger.debug(
+      { filteredCount: filteredRecommendations.length },
+      'Recommendations: filtered recommendations count',
+    );
+
+    return filteredRecommendations;
   }
 
   private async findOnTmdb(title: string, year?: number): Promise<any | null> {

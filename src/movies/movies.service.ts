@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { MovieRating } from '../entities/movie-rating.entity';
 import { MovieBookmark } from '../entities/movie-bookmark.entity';
 import { TmdbService } from './tmdb.service';
+import { filterTmdbResponse, filterSingleMovie, filterMoviesWithPoster } from './utils/movie-filter.util';
 
 type SearchOptions = {
   query?: string;
@@ -32,17 +33,19 @@ export class MoviesService {
 
   async searchMovies(options: SearchOptions) {
     const page = options.page && options.page > 0 ? options.page : 1;
-    return this.tmdb.get('/search/movie', {
+    const response = await this.tmdb.get('/search/movie', {
       query: options.query,
       year: options.year,
       with_genres: options.withGenres,
       sort_by: options.sortBy,
       page,
     });
+    return filterTmdbResponse(response);
   }
 
   async getMovieDetails(tmdbId: number) {
-    return this.tmdb.get(`/movie/${tmdbId}`);
+    const movie = await this.tmdb.get(`/movie/${tmdbId}`);
+    return filterSingleMovie(movie);
   }
 
   async getList(kind: 'trending' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming', page = 1) {
@@ -53,11 +56,13 @@ export class MoviesService {
       now_playing: '/movie/now_playing',
       upcoming: '/movie/upcoming',
     };
-    return this.tmdb.get(pathMap[kind], { page });
+    const response = await this.tmdb.get(pathMap[kind], { page });
+    return filterTmdbResponse(response);
   }
 
   async getSimilar(tmdbId: number, page = 1) {
-    return this.tmdb.get(`/movie/${tmdbId}/similar`, { page });
+    const response = await this.tmdb.get(`/movie/${tmdbId}/similar`, { page });
+    return filterTmdbResponse(response);
   }
 
   async getGenres() {
@@ -132,19 +137,24 @@ export class MoviesService {
       take: limit,
     });
 
+    const mappedBookmarks = bookmarks.map(bookmark => ({
+      id: bookmark.id,
+      tmdbId: bookmark.tmdbId,
+      movieTitle: bookmark.movieTitle,
+      moviePosterPath: bookmark.moviePosterPath,
+      movieReleaseDate: bookmark.movieReleaseDate,
+      createdAt: bookmark.createdAt,
+    }));
+
+    // Filter out bookmarks with null poster_path
+    const filteredBookmarks = filterMoviesWithPoster(mappedBookmarks);
+
     return {
-      bookmarks: bookmarks.map(bookmark => ({
-        id: bookmark.id,
-        tmdbId: bookmark.tmdbId,
-        movieTitle: bookmark.movieTitle,
-        moviePosterPath: bookmark.moviePosterPath,
-        movieReleaseDate: bookmark.movieReleaseDate,
-        createdAt: bookmark.createdAt,
-      })),
-      total,
+      bookmarks: filteredBookmarks,
+      total: filteredBookmarks.length,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(filteredBookmarks.length / limit),
     };
   }
 
