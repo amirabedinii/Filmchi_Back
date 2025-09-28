@@ -38,6 +38,11 @@ export class MoviesController {
     });
   }
 
+  @Get('genres')
+  async getGenres() {
+    return this.movies.getGenres();
+  }
+
   @Get('trending')
   trending(@Query('page') page?: string) {
     return this.movies.getList('trending', page ? Number(page) : 1);

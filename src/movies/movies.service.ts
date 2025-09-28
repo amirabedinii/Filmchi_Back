@@ -60,6 +60,10 @@ export class MoviesService {
     return this.tmdb.get(`/movie/${tmdbId}/similar`, { page });
   }
 
+  async getGenres() {
+    return this.tmdb.getGenres();
+  }
+
   async setUserRating(userId: string, tmdbId: number, rating: number) {
     let entity = await this.ratingRepo.findOne({ where: { userId, tmdbId } });
     if (!entity) {

@@ -93,6 +93,10 @@ export class TmdbService {
   getSimilar(tmdbId: number, page: number = 1) {
     return this.get(`/movie/${tmdbId}/similar`, { page });
   }
+
+  getGenres() {
+    return this.get('/genre/movie/list');
+  }
 }
 
 
