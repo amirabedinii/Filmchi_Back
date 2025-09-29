@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 // Axios v1 headers type can be complex; use a simple record for compatibility
 import { firstValueFrom } from 'rxjs';
+import { getGenreTranslation, hasGenreTranslations } from './genre-translations';
 
 type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
@@ -109,10 +110,20 @@ export class TmdbService {
     return this.get(`/movie/${tmdbId}/similar`, params);
   }
 
-  getGenres(language?: string) {
+  async getGenres(language?: string) {
     const params: any = {};
     if (language) params.language = language;
-    return this.get('/genre/movie/list', params);
+    const response = await this.get('/genre/movie/list', params);
+    
+    // If we have local translations for this language and TMDB returned null names, use our translations
+    if (language && hasGenreTranslations(language) && response.genres) {
+      response.genres = response.genres.map((genre: any) => ({
+        ...genre,
+        name: genre.name || getGenreTranslation(genre.id, language),
+      }));
+    }
+    
+    return response;
   }
 }
 
