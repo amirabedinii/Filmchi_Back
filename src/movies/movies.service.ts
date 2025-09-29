@@ -153,23 +153,25 @@ export class MoviesService {
     });
 
     const mappedBookmarks = bookmarks.map(bookmark => ({
-      id: bookmark.id,
-      tmdbId: bookmark.tmdbId,
-      movieTitle: bookmark.movieTitle,
-      moviePosterPath: bookmark.moviePosterPath,
-      movieReleaseDate: bookmark.movieReleaseDate,
-      createdAt: bookmark.createdAt,
+      id: bookmark.tmdbId, // Use tmdbId as id to match TMDB format
+      title: bookmark.movieTitle,
+      poster_path: bookmark.moviePosterPath,
+      release_date: bookmark.movieReleaseDate,
+      // Add media_type to match trending format
+      media_type: 'movie',
+      // Add bookmark-specific data
+      bookmark_id: bookmark.id,
+      bookmark_created_at: bookmark.createdAt,
     }));
 
     // Filter out bookmarks with null poster_path
     const filteredBookmarks = filterMoviesWithPoster(mappedBookmarks);
 
     return {
-      bookmarks: filteredBookmarks,
-      total: total,
       page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      results: filteredBookmarks,
+      total_pages: Math.ceil(total / limit),
+      total_results: total,
     };
   }
 
