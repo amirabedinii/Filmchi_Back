@@ -60,42 +60,59 @@ export class TmdbService {
   }
 
   // Common TMDB endpoints used around the app
-  searchMovie(query: string, year?: number, page: number = 1) {
+  searchMovie(query: string, year?: number, page: number = 1, language?: string) {
     const params: any = { query, page };
     if (year) params.year = year;
+    if (language) params.language = language;
     return this.get('/search/movie', params);
   }
 
-  getMovieDetails(tmdbId: number) {
-    return this.get(`/movie/${tmdbId}`);
+  getMovieDetails(tmdbId: number, language?: string) {
+    const params: any = {};
+    if (language) params.language = language;
+    return this.get(`/movie/${tmdbId}`, params);
   }
 
-  getTrending() {
-    return this.get('/trending/movie/week');
+  getTrending(language?: string) {
+    const params: any = {};
+    if (language) params.language = language;
+    return this.get('/trending/movie/week', params);
   }
 
-  getPopular(page: number = 1) {
-    return this.get('/movie/popular', { page });
+  getPopular(page: number = 1, language?: string) {
+    const params: any = { page };
+    if (language) params.language = language;
+    return this.get('/movie/popular', params);
   }
 
-  getTopRated(page: number = 1) {
-    return this.get('/movie/top_rated', { page });
+  getTopRated(page: number = 1, language?: string) {
+    const params: any = { page };
+    if (language) params.language = language;
+    return this.get('/movie/top_rated', params);
   }
 
-  getNowPlaying(page: number = 1) {
-    return this.get('/movie/now_playing', { page });
+  getNowPlaying(page: number = 1, language?: string) {
+    const params: any = { page };
+    if (language) params.language = language;
+    return this.get('/movie/now_playing', params);
   }
 
-  getUpcoming(page: number = 1) {
-    return this.get('/movie/upcoming', { page });
+  getUpcoming(page: number = 1, language?: string) {
+    const params: any = { page };
+    if (language) params.language = language;
+    return this.get('/movie/upcoming', params);
   }
 
-  getSimilar(tmdbId: number, page: number = 1) {
-    return this.get(`/movie/${tmdbId}/similar`, { page });
+  getSimilar(tmdbId: number, page: number = 1, language?: string) {
+    const params: any = { page };
+    if (language) params.language = language;
+    return this.get(`/movie/${tmdbId}/similar`, params);
   }
 
-  getGenres() {
-    return this.get('/genre/movie/list');
+  getGenres(language?: string) {
+    const params: any = {};
+    if (language) params.language = language;
+    return this.get('/genre/movie/list', params);
   }
 }
 

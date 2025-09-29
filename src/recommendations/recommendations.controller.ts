@@ -15,7 +15,8 @@ export class RecommendationsController {
   @Post()
   async get(@Req() req: any, @Body() body: GetRecommendationsDto) {
     const userId = req.user.userId;
-    const data = await this.service.getRecommendations(userId, body.query);
+    const language = body.language?.toLowerCase();
+    const data = await this.service.getRecommendations(userId, body.query, language);
     return data;
   }
 }

@@ -15,6 +15,7 @@ type SearchOptions = {
   year?: number;
   withGenres?: string; // comma-separated ids
   sortBy?: string; // popularity.desc, vote_average.desc, etc.
+  language?: string; // ISO 639-1 language code (e.g., 'fa', 'en')
 };
 
 @Injectable()
@@ -33,40 +34,54 @@ export class MoviesService {
 
   async searchMovies(options: SearchOptions) {
     const page = options.page && options.page > 0 ? options.page : 1;
-    const response = await this.tmdb.get('/search/movie', {
+    const params: any = {
       query: options.query,
       year: options.year,
       with_genres: options.withGenres,
       sort_by: options.sortBy,
       page,
-    });
+    };
+    if (options.language) {
+      params.language = options.language;
+    }
+    const response = await this.tmdb.get('/search/movie', params);
     return filterTmdbResponse(response);
   }
 
-  async getMovieDetails(tmdbId: number) {
-    const movie = await this.tmdb.get(`/movie/${tmdbId}`);
+  async getMovieDetails(tmdbId: number, language?: string) {
+    const movie = await this.tmdb.getMovieDetails(tmdbId, language);
     return filterSingleMovie(movie);
   }
 
-  async getList(kind: 'trending' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming', page = 1) {
-    const pathMap: Record<string, string> = {
-      trending: '/trending/movie/week',
-      popular: '/movie/popular',
-      top_rated: '/movie/top_rated',
-      now_playing: '/movie/now_playing',
-      upcoming: '/movie/upcoming',
-    };
-    const response = await this.tmdb.get(pathMap[kind], { page });
+  async getList(kind: 'trending' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming', page = 1, language?: string) {
+    let response;
+    switch (kind) {
+      case 'trending':
+        response = await this.tmdb.getTrending(language);
+        break;
+      case 'popular':
+        response = await this.tmdb.getPopular(page, language);
+        break;
+      case 'top_rated':
+        response = await this.tmdb.getTopRated(page, language);
+        break;
+      case 'now_playing':
+        response = await this.tmdb.getNowPlaying(page, language);
+        break;
+      case 'upcoming':
+        response = await this.tmdb.getUpcoming(page, language);
+        break;
+    }
     return filterTmdbResponse(response);
   }
 
-  async getSimilar(tmdbId: number, page = 1) {
-    const response = await this.tmdb.get(`/movie/${tmdbId}/similar`, { page });
+  async getSimilar(tmdbId: number, page = 1, language?: string) {
+    const response = await this.tmdb.getSimilar(tmdbId, page, language);
     return filterTmdbResponse(response);
   }
 
-  async getGenres() {
-    return this.tmdb.getGenres();
+  async getGenres(language?: string) {
+    return this.tmdb.getGenres(language);
   }
 
   async setUserRating(userId: string, tmdbId: number, rating: number) {

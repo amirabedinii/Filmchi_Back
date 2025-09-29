@@ -14,6 +14,14 @@ const CurrentUser = createParamDecorator(
   },
 );
 
+// Utility function to validate language parameter (ISO 639-1 format)
+function validateLanguage(lang?: string): string | undefined {
+  if (!lang) return undefined;
+  // Basic validation for ISO 639-1 format (2 letter codes)
+  const langRegex = /^[a-z]{2}$/i;
+  return langRegex.test(lang) ? lang.toLowerCase() : undefined;
+}
+
 @Controller('movies')
 export class MoviesController {
   constructor(
@@ -28,44 +36,53 @@ export class MoviesController {
     @Query('year') year?: string,
     @Query('with_genres') withGenres?: string,
     @Query('sort_by') sortBy?: string,
+    @Query('lang') lang?: string,
   ) {
+    const language = validateLanguage(lang);
     return this.movies.searchMovies({
       query: q,
       page: page ? Number(page) : 1,
       year: year ? Number(year) : undefined,
       withGenres,
       sortBy,
+      language,
     });
   }
 
   @Get('genres')
-  async getGenres() {
-    return this.movies.getGenres();
+  async getGenres(@Query('lang') lang?: string) {
+    const language = validateLanguage(lang);
+    return this.movies.getGenres(language);
   }
 
   @Get('trending')
-  trending(@Query('page') page?: string) {
-    return this.movies.getList('trending', page ? Number(page) : 1);
+  trending(@Query('page') page?: string, @Query('lang') lang?: string) {
+    const language = validateLanguage(lang);
+    return this.movies.getList('trending', page ? Number(page) : 1, language);
   }
 
   @Get('popular')
-  popular(@Query('page') page?: string) {
-    return this.movies.getList('popular', page ? Number(page) : 1);
+  popular(@Query('page') page?: string, @Query('lang') lang?: string) {
+    const language = validateLanguage(lang);
+    return this.movies.getList('popular', page ? Number(page) : 1, language);
   }
 
   @Get('top-rated')
-  topRated(@Query('page') page?: string) {
-    return this.movies.getList('top_rated', page ? Number(page) : 1);
+  topRated(@Query('page') page?: string, @Query('lang') lang?: string) {
+    const language = validateLanguage(lang);
+    return this.movies.getList('top_rated', page ? Number(page) : 1, language);
   }
 
   @Get('now-playing')
-  nowPlaying(@Query('page') page?: string) {
-    return this.movies.getList('now_playing', page ? Number(page) : 1);
+  nowPlaying(@Query('page') page?: string, @Query('lang') lang?: string) {
+    const language = validateLanguage(lang);
+    return this.movies.getList('now_playing', page ? Number(page) : 1, language);
   }
 
   @Get('upcoming')
-  upcoming(@Query('page') page?: string) {
-    return this.movies.getList('upcoming', page ? Number(page) : 1);
+  upcoming(@Query('page') page?: string, @Query('lang') lang?: string) {
+    const language = validateLanguage(lang);
+    return this.movies.getList('upcoming', page ? Number(page) : 1, language);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -82,13 +99,15 @@ export class MoviesController {
   }
 
   @Get(':tmdbId')
-  async details(@Param('tmdbId') tmdbId: string) {
-    return this.movies.getMovieDetails(Number(tmdbId));
+  async details(@Param('tmdbId') tmdbId: string, @Query('lang') lang?: string) {
+    const language = validateLanguage(lang);
+    return this.movies.getMovieDetails(Number(tmdbId), language);
   }
 
   @Get(':tmdbId/similar')
-  similar(@Param('tmdbId') tmdbId: string, @Query('page') page?: string) {
-    return this.movies.getSimilar(Number(tmdbId), page ? Number(page) : 1);
+  similar(@Param('tmdbId') tmdbId: string, @Query('page') page?: string, @Query('lang') lang?: string) {
+    const language = validateLanguage(lang);
+    return this.movies.getSimilar(Number(tmdbId), page ? Number(page) : 1, language);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -28,6 +28,7 @@ export class RecommendationsService {
   async getRecommendations(
     userId: string,
     userQuery: string,
+    language?: string,
   ): Promise<EnrichedRecommendation[]> {
     Logger.debug({ userId, userQuery }, 'Recommendations: start');
     const watched = await this.listsService.getMoviesForList(
@@ -99,7 +100,7 @@ export class RecommendationsService {
       await Promise.all(
         rawRecs.map(async (rec) => {
           try {
-            const tmdb = await this.findOnTmdb(rec.title, rec.year);
+            const tmdb = await this.findOnTmdb(rec.title, rec.year, language);
             if (!tmdb) {
               Logger.debug(
                 { title: rec.title, year: rec.year },
@@ -140,9 +141,9 @@ export class RecommendationsService {
     return filteredRecommendations;
   }
 
-  private async findOnTmdb(title: string, year?: number): Promise<any | null> {
+  private async findOnTmdb(title: string, year?: number, language?: string): Promise<any | null> {
     try {
-      const searchResp = await this.tmdb.searchMovie(title, year);
+      const searchResp = await this.tmdb.searchMovie(title, year, 1, language);
       const results = Array.isArray(searchResp?.results)
         ? searchResp.results
         : [];
@@ -153,7 +154,7 @@ export class RecommendationsService {
 
       const best = this.pickBestTmdbMatch(title, year, results);
       if (!best) return null;
-      const detailsResp = await this.tmdb.getMovieDetails(best.id);
+      const detailsResp = await this.tmdb.getMovieDetails(best.id, language);
       return detailsResp;
     } catch (error: any) {
       Logger.error({ err: error?.message, title, year }, 'TMDB request failed');
