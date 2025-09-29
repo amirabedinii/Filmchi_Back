@@ -63,7 +63,7 @@ describe('ListsService', () => {
   });
 
   describe('getMoviesForList', () => {
-    it('should return empty array if list does not exist', async () => {
+    it('should return empty response if list does not exist', async () => {
       movieListRepo.findOne.mockResolvedValue(null);
 
       const result = await service.getMoviesForList('user-1', 'watchlist');
@@ -71,7 +71,13 @@ describe('ListsService', () => {
       expect(movieListRepo.findOne).toHaveBeenCalledWith({
         where: { userId: 'user-1', listName: 'watchlist' },
       });
-      expect(result).toEqual([]);
+      expect(result).toEqual({
+        items: [],
+        total: 0,
+        page: 1,
+        limit: 50,
+        totalPages: 0,
+      });
     });
 
     it('should return movies from existing list with default options', async () => {
@@ -89,14 +95,20 @@ describe('ListsService', () => {
         skip: 0,
         take: 50,
       });
-      expect(result).toEqual([
-        {
-          id: mockListItem.id,
-          tmdbId: mockListItem.tmdbId,
-          title: mockListItem.title,
-          addedAt: mockListItem.addedAt,
-        },
-      ]);
+      expect(result).toEqual({
+        items: [
+          {
+            id: mockListItem.id,
+            tmdbId: mockListItem.tmdbId,
+            title: mockListItem.title,
+            addedAt: mockListItem.addedAt,
+          },
+        ],
+        total: 1,
+        page: 1,
+        limit: 50,
+        totalPages: 1,
+      });
     });
 
     it('should handle custom pagination options', async () => {

@@ -57,7 +57,7 @@ export class MoviesService {
     let response;
     switch (kind) {
       case 'trending':
-        response = await this.tmdb.getTrending(language);
+        response = await this.tmdb.getTrending(page, language);
         break;
       case 'popular':
         response = await this.tmdb.getPopular(page, language);
@@ -166,10 +166,10 @@ export class MoviesService {
 
     return {
       bookmarks: filteredBookmarks,
-      total: filteredBookmarks.length,
+      total: total,
       page,
       limit,
-      totalPages: Math.ceil(filteredBookmarks.length / limit),
+      totalPages: Math.ceil(total / limit),
     };
   }
 

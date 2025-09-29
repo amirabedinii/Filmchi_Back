@@ -26,20 +26,35 @@ export class ListsService {
     const list = await this.movieListRepo.findOne({
       where: { userId, listName },
     });
-    if (!list) return [];
+    if (!list) {
+      return {
+        items: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+      };
+    }
 
-    const [items] = await this.listItemRepo.findAndCount({
+    const [items, total] = await this.listItemRepo.findAndCount({
       where: { movieListId: list.id },
       order: { addedAt: sort },
       skip: (page - 1) * limit,
       take: limit,
     });
-    return items.map((i) => ({
-      id: i.id,
-      tmdbId: i.tmdbId,
-      title: i.title,
-      addedAt: i.addedAt,
-    }));
+    
+    return {
+      items: items.map((i) => ({
+        id: i.id,
+        tmdbId: i.tmdbId,
+        title: i.title,
+        addedAt: i.addedAt,
+      })),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async addMovieToList(userId: string, listName: string, dto: AddMovieDto) {

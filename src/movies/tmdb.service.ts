@@ -74,8 +74,8 @@ export class TmdbService {
     return this.get(`/movie/${tmdbId}`, params);
   }
 
-  getTrending(language?: string) {
-    const params: any = {};
+  getTrending(page: number = 1, language?: string) {
+    const params: any = { page };
     if (language) params.language = language;
     return this.get('/trending/movie/week', params);
   }

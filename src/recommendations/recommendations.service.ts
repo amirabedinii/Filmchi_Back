@@ -31,24 +31,24 @@ export class RecommendationsService {
     language?: string,
   ): Promise<EnrichedRecommendation[]> {
     Logger.debug({ userId, userQuery }, 'Recommendations: start');
-    const watched = await this.listsService.getMoviesForList(
+    const watchedResponse = await this.listsService.getMoviesForList(
       userId,
       'watched',
       { page: 1, limit: 50, sort: 'desc' },
     );
-    const watchlist = await this.listsService.getMoviesForList(
+    const watchlistResponse = await this.listsService.getMoviesForList(
       userId,
       'watchlist',
       { page: 1, limit: 50, sort: 'desc' },
     );
     Logger.debug(
-      { watchedCount: watched.length, watchlistCount: watchlist.length },
+      { watchedCount: watchedResponse.items.length, watchlistCount: watchlistResponse.items.length },
       'Recommendations: list counts',
     );
 
     const historyTitles = [
-      ...watched.map((m: any) => m.title).filter(Boolean),
-      ...watchlist.map((m: any) => m.title).filter(Boolean),
+      ...watchedResponse.items.map((m: any) => m.title).filter(Boolean),
+      ...watchlistResponse.items.map((m: any) => m.title).filter(Boolean),
     ];
 
     // Use the new LLM service

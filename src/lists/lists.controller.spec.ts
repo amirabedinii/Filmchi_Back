@@ -46,8 +46,14 @@ describe('ListsController', () => {
 
   describe('getList', () => {
     it('should get movies from list with default parameters', async () => {
-      const mockMovies = [mockMovie];
-      listsService.getMoviesForList.mockResolvedValue(mockMovies);
+      const mockResponse = {
+        items: [mockMovie],
+        total: 1,
+        page: 1,
+        limit: 50,
+        totalPages: 1,
+      };
+      listsService.getMoviesForList.mockResolvedValue(mockResponse);
 
       const result = await controller.getList(mockUser, 'watchlist');
 
@@ -60,12 +66,18 @@ describe('ListsController', () => {
           sort: 'desc',
         },
       );
-      expect(result).toEqual(mockMovies);
+      expect(result).toEqual(mockResponse);
     });
 
     it('should handle custom query parameters', async () => {
-      const mockMovies = [mockMovie];
-      listsService.getMoviesForList.mockResolvedValue(mockMovies);
+      const mockResponse = {
+        items: [mockMovie],
+        total: 1,
+        page: 2,
+        limit: 25,
+        totalPages: 1,
+      };
+      listsService.getMoviesForList.mockResolvedValue(mockResponse);
 
       const result = await controller.getList(
         mockUser,
@@ -84,12 +96,18 @@ describe('ListsController', () => {
           sort: 'asc',
         },
       );
-      expect(result).toEqual(mockMovies);
+      expect(result).toEqual(mockResponse);
     });
 
     it('should limit the maximum limit to 100', async () => {
-      const mockMovies = [mockMovie];
-      listsService.getMoviesForList.mockResolvedValue(mockMovies);
+      const mockResponse = {
+        items: [mockMovie],
+        total: 1,
+        page: 1,
+        limit: 100,
+        totalPages: 1,
+      };
+      listsService.getMoviesForList.mockResolvedValue(mockResponse);
 
       await controller.getList(mockUser, 'watchlist', '1', '1000');
 
@@ -105,8 +123,14 @@ describe('ListsController', () => {
     });
 
     it('should default sort to desc if not addedAt:asc', async () => {
-      const mockMovies = [mockMovie];
-      listsService.getMoviesForList.mockResolvedValue(mockMovies);
+      const mockResponse = {
+        items: [mockMovie],
+        total: 1,
+        page: 1,
+        limit: 50,
+        totalPages: 1,
+      };
+      listsService.getMoviesForList.mockResolvedValue(mockResponse);
 
       await controller.getList(
         mockUser,
@@ -128,8 +152,14 @@ describe('ListsController', () => {
     });
 
     it('should handle invalid page and limit parameters', async () => {
-      const mockMovies = [mockMovie];
-      listsService.getMoviesForList.mockResolvedValue(mockMovies);
+      const mockResponse = {
+        items: [mockMovie],
+        total: 1,
+        page: NaN,
+        limit: NaN,
+        totalPages: 1,
+      };
+      listsService.getMoviesForList.mockResolvedValue(mockResponse);
 
       await controller.getList(mockUser, 'watchlist', 'invalid', 'invalid');
 
