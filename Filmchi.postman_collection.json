@@ -643,7 +643,7 @@
       "name": "Recommendations (Protected)",
       "item": [
         {
-          "name": "POST /recommendations",
+          "name": "POST /recommendations (Basic - with Iranian filter)",
           "request": {
             "method": "POST",
             "header": [
@@ -651,7 +651,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"query\": \"sci-fi movies with time travel\",\n  \"language\": \"{{language}}\"\n}"
+              "raw": "{\n  \"query\": \"action movies\",\n  \"language\": \"{{language}}\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/recommendations",
@@ -711,6 +711,98 @@
               ],
               "cookie": [],
               "body": "[\n  {\n    \"title\": \"Back to the Future\",\n    \"year\": 1985,\n    \"reason\": \"Classic time travel movie with a teenager going back to the 1950s\",\n    \"tmdbId\": 105,\n    \"posterPath\": \"/fNOH9f1aA7XRTzl1sAOx9iF553Q.jpg\",\n    \"overview\": \"Eighties teenager Marty McFly is accidentally sent back in time to 1955.\"\n  },\n  {\n    \"title\": \"Groundhog Day\",\n    \"year\": 1993,\n    \"reason\": \"Time loop movie where the protagonist relives the same day\",\n    \"tmdbId\": 137,\n    \"posterPath\": \"/gyudd8k9QdP9ES9sAPaq7wcLJUe.jpg\",\n    \"overview\": \"A narcissistic TV weatherman finds himself stuck in a time loop.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /recommendations (Custom Content Filter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"comedy movies\",\n  \"language\": \"{{language}}\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"PG\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [18, 27, 53],\n    \"excludeKeywords\": [\"violence\", \"blood\", \"death\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Custom Filtered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"comedy movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"PG\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [18, 27, 53],\n    \"excludeKeywords\": [\"violence\", \"blood\", \"death\"]\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"توی استودیو\",\n    \"year\": 2008,\n    \"reason\": \"فیلم کمدی خانوادگی مناسب برای همه سنین\",\n    \"tmdbId\": 10515,\n    \"posterPath\": \"/example_poster.jpg\",\n    \"overview\": \"داستان کمدی درباره گروهی از دوستان که در استودیو فیلم کار می‌کنند.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /recommendations (No Content Filter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"all movies\",\n  \"language\": \"{{language}}\",\n  \"contentFilter\": {\n    \"includeAdult\": true,\n    \"maxCertification\": \"NC-17\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Unfiltered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"all movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": true,\n    \"maxCertification\": \"NC-17\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"فیلم نمونه\",\n    \"year\": 2023,\n    \"reason\": \"فیلم با محتوای بزرگسالان\",\n    \"tmdbId\": 12345,\n    \"posterPath\": \"/example_poster.jpg\",\n    \"overview\": \"داستان فیلم با محتوای مناسب برای بزرگسالان.\"\n  }\n]"
             }
           ]
         }
@@ -935,6 +1027,195 @@
             }
           },
           "response": []
+        }
+      ]
+    },
+    {
+      "name": "Content Filtering Examples",
+      "item": [
+        {
+          "name": "POST /recommendations (Iranian Filter - Default)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"action movies\",\n  \"language\": \"fa\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Iranian Filtered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"action movies\",\n  \"language\": \"fa\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"مرد عنکبوتی: راهی به خانه نیست\",\n    \"year\": 2021,\n    \"reason\": \"فیلم اکشن مناسب برای خانواده با رتبه PG-13\",\n    \"tmdbId\": 634649,\n    \"posterPath\": \"/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg\",\n    \"overview\": \"پیتر پارکر هویت خود را آشکار می‌کند و از دکتر استرنج کمک می‌خواهد.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /recommendations (Strict Family Filter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"family movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"G\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [18, 27, 53, 80],\n    \"excludeKeywords\": [\"violence\", \"death\", \"blood\", \"sex\", \"nude\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Strict Family Filtered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"family movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"G\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [18, 27, 53, 80],\n    \"excludeKeywords\": [\"violence\", \"death\", \"blood\", \"sex\", \"nude\"]\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"یخ‌زده\",\n    \"year\": 2013,\n    \"reason\": \"انیمیشن خانوادگی مناسب برای همه سنین\",\n    \"tmdbId\": 109445,\n    \"posterPath\": \"/jIjdFXKUNtdz1m4f3QnPD6nFnWV.jpg\",\n    \"overview\": \"داستان دو خواهر که در سفری جادویی برای نجات پادشاهی خود شرکت می‌کنند.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /recommendations (Teen Filter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"teen movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"PG-13\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [27, 80],\n    \"excludeKeywords\": [\"sex\", \"nude\", \"explicit\", \"adult\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Teen Filtered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"teen movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"PG-13\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [27, 80],\n    \"excludeKeywords\": [\"sex\", \"nude\", \"explicit\", \"adult\"]\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"دبیرستان موزیکال\",\n    \"year\": 2006,\n    \"reason\": \"فیلم موزیکال مناسب برای نوجوانان\",\n    \"tmdbId\": 11423,\n    \"posterPath\": \"/example_poster.jpg\",\n    \"overview\": \"داستان دانش‌آموزان دبیرستان که در مسابقه موزیکال شرکت می‌کنند.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /recommendations (No Filter - All Content)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"drama movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": true,\n    \"maxCertification\": \"NC-17\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Unfiltered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"drama movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": true,\n    \"maxCertification\": \"NC-17\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"فیلم درام نمونه\",\n    \"year\": 2023,\n    \"reason\": \"فیلم درام با محتوای بزرگسالان\",\n    \"tmdbId\": 12345,\n    \"posterPath\": \"/example_poster.jpg\",\n    \"overview\": \"داستان درام با محتوای مناسب برای بزرگسالان.\"\n  }\n]"
+            }
+          ]
         }
       ]
     }

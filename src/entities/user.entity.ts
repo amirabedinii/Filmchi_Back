@@ -62,6 +62,17 @@ export class User {
   @Column({ name: 'account_preferences', type: 'simple-json', nullable: true })
   accountPreferences: Record<string, any> | null;
 
+  // Content filtering preferences
+  @Column({ name: 'content_filter_settings', type: 'simple-json', nullable: true })
+  contentFilterSettings: {
+    includeAdult?: boolean;
+    maxCertification?: string;
+    certificationCountry?: string;
+    excludeGenres?: number[];
+    excludeKeywords?: string[];
+    enabled?: boolean;
+  } | null;
+
   // Activity status
   @Column({ name: 'activity_status', type: 'varchar', default: 'active' })
   activityStatus: string;

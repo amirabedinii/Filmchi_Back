@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { ListsService } from '../lists/lists.service';
 import { LLMService } from '../llm/services/llm.service';
 import { TmdbService } from '../movies/tmdb.service';
-import { filterMoviesWithPoster } from '../movies/utils/movie-filter.util';
+import { filterMoviesWithPoster, filterContent, ContentFilterOptions, IRANIAN_CONTENT_FILTER } from '../movies/utils/movie-filter.util';
 
 type RawRecommendation = { title: string; year?: number; reason: string };
 
@@ -29,6 +29,7 @@ export class RecommendationsService {
     userId: string,
     userQuery: string,
     language?: string,
+    contentFilter?: ContentFilterOptions,
   ): Promise<EnrichedRecommendation[]> {
     Logger.debug({ userId, userQuery }, 'Recommendations: start');
     const watchedResponse = await this.listsService.getMoviesForList(
@@ -100,7 +101,7 @@ export class RecommendationsService {
       await Promise.all(
         rawRecs.map(async (rec) => {
           try {
-            const tmdb = await this.findOnTmdb(rec.title, rec.year, language);
+            const tmdb = await this.findOnTmdb(rec.title, rec.year, language, contentFilter);
             if (!tmdb) {
               Logger.debug(
                 { title: rec.title, year: rec.year },
@@ -173,9 +174,9 @@ export class RecommendationsService {
     return finalRecommendations;
   }
 
-  private async findOnTmdb(title: string, year?: number, language?: string): Promise<any | null> {
+  private async findOnTmdb(title: string, year?: number, language?: string, contentFilter?: ContentFilterOptions): Promise<any | null> {
     try {
-      const searchResp = await this.tmdb.searchMovie(title, year, 1, language);
+      const searchResp = await this.tmdb.searchMovie(title, year, 1, language, contentFilter);
       const results = Array.isArray(searchResp?.results)
         ? searchResp.results
         : [];
@@ -187,6 +188,17 @@ export class RecommendationsService {
       const best = this.pickBestTmdbMatch(title, year, results);
       if (!best) return null;
       const detailsResp = await this.tmdb.getMovieDetails(best.id, language);
+      
+      // Apply additional content filtering on the movie details if needed
+      if (contentFilter && detailsResp) {
+        const filteredResults = filterContent([detailsResp], contentFilter);
+        if (filteredResults.length === 0) {
+          Logger.debug({ title, year }, 'Movie filtered out by content filter');
+          return null;
+        }
+        return filteredResults[0];
+      }
+      
       return detailsResp;
     } catch (error: any) {
       Logger.error({ err: error?.message, title, year }, 'TMDB request failed');

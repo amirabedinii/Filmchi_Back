@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 // Axios v1 headers type can be complex; use a simple record for compatibility
 import { firstValueFrom } from 'rxjs';
 import { getGenreTranslation, hasGenreTranslations } from './genre-translations';
+import { ContentFilterOptions, createTmdbFilterParams } from './utils/movie-filter.util';
 
 type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
@@ -61,10 +62,17 @@ export class TmdbService {
   }
 
   // Common TMDB endpoints used around the app
-  searchMovie(query: string, year?: number, page: number = 1, language?: string) {
+  searchMovie(query: string, year?: number, page: number = 1, language?: string, contentFilter?: ContentFilterOptions) {
     const params: any = { query, page };
     if (year) params.year = year;
     if (language) params.language = language;
+    
+    // Apply content filtering
+    if (contentFilter) {
+      const filterParams = createTmdbFilterParams(contentFilter);
+      Object.assign(params, filterParams);
+    }
+    
     return this.get('/search/movie', params);
   }
 
@@ -74,39 +82,81 @@ export class TmdbService {
     return this.get(`/movie/${tmdbId}`, params);
   }
 
-  getTrending(page: number = 1, language?: string) {
+  getTrending(page: number = 1, language?: string, contentFilter?: ContentFilterOptions) {
     const params: any = { page };
     if (language) params.language = language;
+    
+    // Apply content filtering
+    if (contentFilter) {
+      const filterParams = createTmdbFilterParams(contentFilter);
+      Object.assign(params, filterParams);
+    }
+    
     return this.get('/trending/movie/week', params);
   }
 
-  getPopular(page: number = 1, language?: string) {
+  getPopular(page: number = 1, language?: string, contentFilter?: ContentFilterOptions) {
     const params: any = { page };
     if (language) params.language = language;
+    
+    // Apply content filtering
+    if (contentFilter) {
+      const filterParams = createTmdbFilterParams(contentFilter);
+      Object.assign(params, filterParams);
+    }
+    
     return this.get('/movie/popular', params);
   }
 
-  getTopRated(page: number = 1, language?: string) {
+  getTopRated(page: number = 1, language?: string, contentFilter?: ContentFilterOptions) {
     const params: any = { page };
     if (language) params.language = language;
+    
+    // Apply content filtering
+    if (contentFilter) {
+      const filterParams = createTmdbFilterParams(contentFilter);
+      Object.assign(params, filterParams);
+    }
+    
     return this.get('/movie/top_rated', params);
   }
 
-  getNowPlaying(page: number = 1, language?: string) {
+  getNowPlaying(page: number = 1, language?: string, contentFilter?: ContentFilterOptions) {
     const params: any = { page };
     if (language) params.language = language;
+    
+    // Apply content filtering
+    if (contentFilter) {
+      const filterParams = createTmdbFilterParams(contentFilter);
+      Object.assign(params, filterParams);
+    }
+    
     return this.get('/movie/now_playing', params);
   }
 
-  getUpcoming(page: number = 1, language?: string) {
+  getUpcoming(page: number = 1, language?: string, contentFilter?: ContentFilterOptions) {
     const params: any = { page };
     if (language) params.language = language;
+    
+    // Apply content filtering
+    if (contentFilter) {
+      const filterParams = createTmdbFilterParams(contentFilter);
+      Object.assign(params, filterParams);
+    }
+    
     return this.get('/movie/upcoming', params);
   }
 
-  getSimilar(tmdbId: number, page: number = 1, language?: string) {
+  getSimilar(tmdbId: number, page: number = 1, language?: string, contentFilter?: ContentFilterOptions) {
     const params: any = { page };
     if (language) params.language = language;
+    
+    // Apply content filtering
+    if (contentFilter) {
+      const filterParams = createTmdbFilterParams(contentFilter);
+      Object.assign(params, filterParams);
+    }
+    
     return this.get(`/movie/${tmdbId}/similar`, params);
   }
 
