@@ -48,6 +48,7 @@ export class ListsService {
         id: i.id,
         tmdbId: i.tmdbId,
         title: i.title,
+        posterPath: i.posterPath,
         addedAt: i.addedAt,
       })),
       total,
@@ -75,6 +76,7 @@ export class ListsService {
         id: exists.id,
         tmdbId: exists.tmdbId,
         title: exists.title,
+        posterPath: exists.posterPath,
         addedAt: exists.addedAt,
       };
     }
@@ -83,12 +85,14 @@ export class ListsService {
       movieListId: list.id,
       tmdbId: dto.tmdbId,
       title: dto.title,
+      posterPath: dto.posterPath || null,
     });
     const saved = await this.listItemRepo.save(item);
     return {
       id: saved.id,
       tmdbId: saved.tmdbId,
       title: saved.title,
+      posterPath: saved.posterPath,
       addedAt: saved.addedAt,
     };
   }

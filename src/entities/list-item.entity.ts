@@ -22,6 +22,9 @@ export class ListItem {
   @Column()
   title: string;
 
+  @Column({ name: 'poster_path', type: 'varchar', nullable: true })
+  posterPath: string | null;
+
   @CreateDateColumn({ name: 'added_at' })
   addedAt: Date;
 

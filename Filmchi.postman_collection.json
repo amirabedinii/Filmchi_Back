@@ -601,7 +601,7 @@
                 {"key": "Content-Type", "value": "application/json"}
               ],
               "cookie": [],
-              "body": "[\n  {\n    \"tmdbId\": 603,\n    \"title\": \"The Matrix\",\n    \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\",\n    \"addedAt\": \"2024-01-15T10:30:00.000Z\"\n  },\n  {\n    \"tmdbId\": 550,\n    \"title\": \"Fight Club\",\n    \"posterPath\": \"/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg\",\n    \"addedAt\": \"2024-01-14T15:20:00.000Z\"\n  }\n]"
+              "body": "{\n  \"items\": [\n    {\n      \"id\": \"b30cfc0a-cc1c-4e76-abbe-7356c08939be\",\n      \"tmdbId\": 603,\n      \"title\": \"The Matrix\",\n      \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\",\n      \"addedAt\": \"2024-01-15T10:30:00.000Z\"\n    },\n    {\n      \"id\": \"b929dfe6-868a-421f-8a32-5ca1f1f5faff\",\n      \"tmdbId\": 550,\n      \"title\": \"Fight Club\",\n      \"posterPath\": \"/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg\",\n      \"addedAt\": \"2024-01-14T15:20:00.000Z\"\n    }\n  ],\n  \"total\": 2,\n  \"page\": 1,\n  \"limit\": 50,\n  \"totalPages\": 1\n}"
             }
           ]
         },
@@ -614,7 +614,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tmdbId\": {{tmdbId}},\n  \"title\": \"The Matrix\"\n}"
+              "raw": "{\n  \"tmdbId\": {{tmdbId}},\n  \"title\": \"The Matrix\",\n  \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/lists/{{listName}}",
@@ -622,7 +622,34 @@
               "path": ["lists", "{{listName}}"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Add Movie to List",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tmdbId\": 603,\n  \"title\": \"The Matrix\",\n  \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/lists/watchlist",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["lists", "watchlist"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": \"b30cfc0a-cc1c-4e76-abbe-7356c08939be\",\n  \"tmdbId\": 603,\n  \"title\": \"The Matrix\",\n  \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\",\n  \"addedAt\": \"2024-01-15T10:30:00.000Z\"\n}"
+            }
+          ]
         },
         {
           "name": "DELETE /lists/:listName/:tmdbId",

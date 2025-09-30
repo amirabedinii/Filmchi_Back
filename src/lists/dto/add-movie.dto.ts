@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, Min, IsOptional, IsString } from 'class-validator';
 
 export class AddMovieDto {
   @IsInt()
@@ -7,4 +7,8 @@ export class AddMovieDto {
 
   @IsNotEmpty()
   title: string;
+
+  @IsOptional()
+  @IsString()
+  posterPath?: string;
 }
