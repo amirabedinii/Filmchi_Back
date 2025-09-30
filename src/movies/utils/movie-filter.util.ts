@@ -162,12 +162,10 @@ export function createTmdbFilterParams(options: ContentFilterOptions = {}): Reco
 
 /**
  * Default content filter for Iranian audiences
- * Excludes R-rated content, adult content, and potentially problematic genres
+ * Only filters by certification (PG-13 and below), no genre exclusions
  */
 export const IRANIAN_CONTENT_FILTER: ContentFilterOptions = {
   includeAdult: false,
   maxCertification: 'PG-13',
-  certificationCountry: 'US',
-  excludeGenres: [18, 10749], // Drama and Romance genres
-  excludeKeywords: ['sex', 'nude', 'erotic', 'adult', 'explicit']
+  certificationCountry: 'US'
 };

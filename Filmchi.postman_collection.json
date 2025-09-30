@@ -1075,7 +1075,7 @@
                 {"key": "Content-Type", "value": "application/json"}
               ],
               "cookie": [],
-              "body": "[\n  {\n    \"title\": \"مرد عنکبوتی: راهی به خانه نیست\",\n    \"year\": 2021,\n    \"reason\": \"فیلم اکشن مناسب برای خانواده با رتبه PG-13\",\n    \"tmdbId\": 634649,\n    \"posterPath\": \"/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg\",\n    \"overview\": \"پیتر پارکر هویت خود را آشکار می‌کند و از دکتر استرنج کمک می‌خواهد.\"\n  }\n]"
+              "body": "[\n  {\n    \"title\": \"10 Things I Hate About You\",\n    \"year\": 1999,\n    \"reason\": \"فیلم کمدی رمانتیک کلاسیک دهه 90 با رتبه PG-13\",\n    \"tmdbId\": 4951,\n    \"posterPath\": \"/ujERk3aKABXU3NDXOAxEQYTHe9A.jpg\",\n    \"overview\": \"این فیلم برگرفته شده از یکی از نمایشنامه‌های شکسپیر می باشد که به شکل مدرن و در میان دانش آموزان دبیرستانی به اجرا در می آید.\"\n  }\n]"
             }
           ]
         },
