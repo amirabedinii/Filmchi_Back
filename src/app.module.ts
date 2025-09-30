@@ -52,11 +52,13 @@ import * as Joi from 'joi';
         OLLAMA_URL: Joi.string().uri().default('http://localhost:11434'),
         OLLAMA_MODEL: Joi.string().default('llama3.2:latest'),
         LLM_PRIMARY_PROVIDER: Joi.string()
-          .valid('ollama', 'openai', 'anthropic', 'gemini')
-          .default('ollama'),
+          .valid('ollama', 'openai', 'anthropic', 'gemini', 'openrouter')
+          .default('openrouter'),
         OPENAI_API_KEY: Joi.string().allow('').optional(),
         ANTHROPIC_API_KEY: Joi.string().allow('').optional(),
         GEMINI_API_KEY: Joi.string().allow('').optional(),
+        OPENROUTER_API_KEY: Joi.string().allow('').optional(),
+        OPENROUTER_MODEL: Joi.string().default('openai/gpt-4o-mini'),
         PORT: Joi.number().default(3001),
       }),
     }),

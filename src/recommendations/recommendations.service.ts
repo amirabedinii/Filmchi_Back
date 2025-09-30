@@ -59,6 +59,7 @@ export class RecommendationsService {
         userQuery,
         userHistory: historyTitles,
         maxRecommendations: 7,
+        language,
       });
 
       rawRecs = llmResponse.recommendations || [];

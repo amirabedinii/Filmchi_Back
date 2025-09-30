@@ -4,6 +4,10 @@ export interface LLMRequest {
   maxTokens?: number;
   temperature?: number;
   model?: string;
+  metadata?: {
+    language?: string;
+    [key: string]: any;
+  };
 }
 
 export interface LLMResponse<T = any> {
@@ -31,6 +35,7 @@ export enum LLMProviderType {
   OPENAI = 'openai',
   ANTHROPIC = 'anthropic',
   GEMINI = 'gemini',
+  OPENROUTER = 'openrouter',
 }
 
 export interface LLMProviderConfig {

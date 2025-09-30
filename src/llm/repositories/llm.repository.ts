@@ -186,7 +186,7 @@ export class LLMRepositoryImpl implements LLMRepository {
     // In the future, this could be configurable via environment variables
     const primaryProvider = this.configService.get<string>(
       'LLM_PRIMARY_PROVIDER',
-      'ollama',
+      'openrouter',
     );
 
     const order = [primaryProvider as LLMProviderType];

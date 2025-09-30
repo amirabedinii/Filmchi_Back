@@ -42,9 +42,17 @@ export class OllamaProvider extends BaseLLMProvider {
     );
     const model = request.model || defaultModel;
 
+    // Enhance prompt with language instruction if needed
+    let enhancedPrompt = request.prompt;
+    const language = request.metadata?.language;
+    const isPersian = language === 'fa' || language === 'persian' || language === 'farsi';
+    if (isPersian && request.schema) {
+      enhancedPrompt += `\n\n🔴 CRITICAL: Write the "reason" field in Persian/Farsi (فارسی). Movie titles in English, explanations in فارسی.`;
+    }
+
     const payload = {
       model,
-      prompt: request.prompt,
+      prompt: enhancedPrompt,
       stream: false,
       format: request.schema,
       options: {

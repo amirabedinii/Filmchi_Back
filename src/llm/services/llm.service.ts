@@ -10,6 +10,7 @@ export interface RecommendationRequest {
   userQuery: string;
   userHistory: string[];
   maxRecommendations?: number;
+  language?: string;
 }
 
 export interface RecommendationResponse {
@@ -40,8 +41,11 @@ export class LLMService {
     const llmRequest: LLMRequest = {
       prompt,
       schema,
-      temperature: 0.7,
+      temperature: 0.8,
       maxTokens: 2048,
+      metadata: {
+        language: request.language,
+      },
     };
 
     this.logger.debug(
@@ -124,24 +128,37 @@ export class LLMService {
   private buildMovieRecommendationPrompt(
     request: RecommendationRequest,
   ): string {
-    const { userQuery, userHistory, maxRecommendations = 7 } = request;
+    const { userQuery, userHistory, maxRecommendations = 7, language } = request;
     const historyStr = userHistory.slice(0, 50).join(', ');
+    
+    // Determine if response should be in Persian
+    const isPersian = language === 'fa' || language === 'persian' || language === 'farsi';
+    const languageInstruction = isPersian 
+      ? '\n\nIMPORTANT: Write ALL recommendation reasons ("reason" field) in Persian/Farsi language. The movie titles should remain in their original English form, but explanations must be in Persian.'
+      : '';
 
     return [
       'You are an expert movie recommendation engine with deep knowledge of cinema across all genres, eras, and cultures.',
+      'You have exceptional understanding of human emotions and can recommend movies that match specific moods and feelings.',
       '',
       `User's viewing history: ${historyStr || 'No previous viewing history available'}`,
       '',
-      `User's current request: "${userQuery}"`,
+      `User's current emotional state and request: "${userQuery}"`,
       '',
-      `Please recommend ${maxRecommendations} movies that match the user's request. Consider their viewing history to avoid duplicates and provide diverse, high-quality recommendations.`,
+      `Please recommend ${maxRecommendations} movies that match the user's emotional state and request.`,
       '',
-      'Guidelines:',
+      'CRITICAL GUIDELINES:',
+      '- CAREFULLY analyze the user\'s emotional state from their request',
+      '- If the user feels sad, down, or unwell, recommend UPLIFTING, COMFORTING, and FEEL-GOOD movies',
+      '- AVOID complex, mind-bending, or emotionally heavy films when user needs comfort',
+      '- Recommend movies that can genuinely improve their mood',
       '- Provide a mix of popular and hidden gem films',
       '- Include movies from different time periods when appropriate',
-      '- Ensure each recommendation has a clear, compelling reason',
+      '- Ensure each recommendation has a clear, compelling reason that explains HOW it matches their emotional needs',
       "- Avoid recommending movies that appear to be in the user's history",
       '- Include release year when known',
+      '- Prioritize emotional resonance over intellectual complexity when user needs comfort',
+      languageInstruction,
       '',
       'Return your response as JSON strictly matching the provided schema.',
     ].join('\n');

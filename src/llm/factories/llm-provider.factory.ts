@@ -6,6 +6,7 @@ import {
   LLMProviderType,
 } from '../interfaces/llm-provider.interface';
 import { OllamaProvider } from '../providers/ollama.provider';
+import { OpenRouterProvider } from '../providers/openrouter.provider';
 
 @Injectable()
 export class LLMProviderFactory {
@@ -18,6 +19,9 @@ export class LLMProviderFactory {
     switch (type) {
       case LLMProviderType.OLLAMA:
         return new OllamaProvider(this.httpService, this.configService);
+
+      case LLMProviderType.OPENROUTER:
+        return new OpenRouterProvider(this.configService);
 
       case LLMProviderType.OPENAI:
         throw new Error('OpenAI provider not yet implemented');
@@ -36,6 +40,7 @@ export class LLMProviderFactory {
   getAvailableProviderTypes(): LLMProviderType[] {
     return [
       LLMProviderType.OLLAMA,
+      LLMProviderType.OPENROUTER,
       // LLMProviderType.OPENAI,
       // LLMProviderType.ANTHROPIC,
       // LLMProviderType.GEMINI,
