@@ -39,17 +39,27 @@ export function filterMoviesWithPoster<T extends MovieWithPoster>(movies: T[]): 
 
 /**
  * Filters a TMDB API response to remove movies without poster_path
+ * and optionally apply content filtering
  * @param response TMDB API response with results array
+ * @param contentFilter Optional content filtering options
  * @returns Modified response with filtered results
  */
-export function filterTmdbResponse(response: any): any {
+export function filterTmdbResponse(response: any, contentFilter?: ContentFilterOptions): any {
   if (!response || !Array.isArray(response.results)) {
     return response;
   }
   
+  let filteredResults = filterMoviesWithPoster(response.results);
+  
+  // Apply content filtering if provided
+  if (contentFilter) {
+    filteredResults = filterSearchResults(filteredResults, contentFilter);
+  }
+  
   return {
     ...response,
-    results: filterMoviesWithPoster(response.results)
+    results: filteredResults,
+    total_results: filteredResults.length
   };
 }
 
@@ -128,6 +138,68 @@ export function filterContent<T extends MovieWithCertification>(
   });
 }
 
+export interface SearchMovieResult extends MovieWithPoster {
+  title?: string;
+  original_title?: string;
+  overview?: string;
+  adult?: boolean;
+  genre_ids?: number[];
+}
+
+/**
+ * Filters search results based on title and overview content
+ * Used for /search/movie endpoint which doesn't support certification filtering
+ * @param movies Array of movie objects from search results
+ * @param options Content filtering options
+ * @returns Filtered array of movies
+ */
+export function filterSearchResults<T extends SearchMovieResult>(movies: T[], options: ContentFilterOptions = {}): T[] {
+  if (!Array.isArray(movies)) {
+    return [];
+  }
+
+  const {
+    includeAdult = false,
+    excludeGenres = [],
+    excludeKeywords = []
+  } = options;
+
+  return movies.filter(movie => {
+    // Filter adult content
+    if (!includeAdult && movie.adult === true) {
+      return false;
+    }
+
+    // Filter by genres (using genre_ids from search results)
+    if (excludeGenres.length > 0 && movie.genre_ids) {
+      const hasExcludedGenre = excludeGenres.some(genreId => movie.genre_ids!.includes(genreId));
+      if (hasExcludedGenre) {
+        return false;
+      }
+    }
+
+    // Filter by keywords in title and overview
+    if (excludeKeywords.length > 0) {
+      const title = (movie.title || '').toLowerCase();
+      const originalTitle = (movie.original_title || '').toLowerCase();
+      const overview = (movie.overview || '').toLowerCase();
+      
+      const hasExcludedKeyword = excludeKeywords.some(keyword => {
+        const lowerKeyword = keyword.toLowerCase();
+        return title.includes(lowerKeyword) || 
+               originalTitle.includes(lowerKeyword) || 
+               overview.includes(lowerKeyword);
+      });
+      
+      if (hasExcludedKeyword) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
+
 /**
  * Creates TMDB API parameters for content filtering
  * @param options Content filtering options
@@ -162,10 +234,15 @@ export function createTmdbFilterParams(options: ContentFilterOptions = {}): Reco
 
 /**
  * Default content filter for Iranian audiences
- * Only filters by certification (PG-13 and below), no genre exclusions
+ * Filters adult content and excludes explicit genres
  */
 export const IRANIAN_CONTENT_FILTER: ContentFilterOptions = {
   includeAdult: false,
   maxCertification: 'PG-13',
-  certificationCountry: 'US'
+  certificationCountry: 'US',
+  // Exclude adult-oriented genres (IDs from TMDB)
+  // No specific adult genre IDs, as adult content is filtered by adult flag
+  excludeGenres: [],
+  // Filter explicit keywords in titles/overviews
+  excludeKeywords: ['sex', 'porn', 'erotic', 'xxx', 'adult']
 };

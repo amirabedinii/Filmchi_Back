@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 import { MovieRating } from '../entities/movie-rating.entity';
 import { MovieBookmark } from '../entities/movie-bookmark.entity';
 import { TmdbService } from './tmdb.service';
-import { filterTmdbResponse, filterSingleMovie, filterMoviesWithPoster } from './utils/movie-filter.util';
+import { filterTmdbResponse, filterSingleMovie, filterMoviesWithPoster, ContentFilterOptions, createTmdbFilterParams } from './utils/movie-filter.util';
 
 type SearchOptions = {
   query?: string;
@@ -16,6 +16,7 @@ type SearchOptions = {
   withGenres?: string; // comma-separated ids
   sortBy?: string; // popularity.desc, vote_average.desc, etc.
   language?: string; // ISO 639-1 language code (e.g., 'fa', 'en')
+  contentFilter?: ContentFilterOptions;
 };
 
 @Injectable()
@@ -44,8 +45,17 @@ export class MoviesService {
     if (options.language) {
       params.language = options.language;
     }
+    
+    // Apply content filtering (only include_adult works on search endpoint)
+    if (options.contentFilter) {
+      params.include_adult = options.contentFilter.includeAdult ?? false;
+      // Note: certification filtering doesn't work on /search/movie, only on /discover/movie
+      // We'll filter results after receiving them
+    }
+    
     const response = await this.tmdb.get('/search/movie', params);
-    return filterTmdbResponse(response);
+    // Apply post-filtering for content (keywords, genres, etc.)
+    return filterTmdbResponse(response, options.contentFilter);
   }
 
   async getMovieDetails(tmdbId: number, language?: string) {
@@ -53,31 +63,31 @@ export class MoviesService {
     return filterSingleMovie(movie);
   }
 
-  async getList(kind: 'trending' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming', page = 1, language?: string) {
+  async getList(kind: 'trending' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming', page = 1, language?: string, contentFilter?: ContentFilterOptions) {
     let response;
     switch (kind) {
       case 'trending':
-        response = await this.tmdb.getTrending(page, language);
+        response = await this.tmdb.getTrending(page, language, contentFilter);
         break;
       case 'popular':
-        response = await this.tmdb.getPopular(page, language);
+        response = await this.tmdb.getPopular(page, language, contentFilter);
         break;
       case 'top_rated':
-        response = await this.tmdb.getTopRated(page, language);
+        response = await this.tmdb.getTopRated(page, language, contentFilter);
         break;
       case 'now_playing':
-        response = await this.tmdb.getNowPlaying(page, language);
+        response = await this.tmdb.getNowPlaying(page, language, contentFilter);
         break;
       case 'upcoming':
-        response = await this.tmdb.getUpcoming(page, language);
+        response = await this.tmdb.getUpcoming(page, language, contentFilter);
         break;
     }
-    return filterTmdbResponse(response);
+    return filterTmdbResponse(response, contentFilter);
   }
 
-  async getSimilar(tmdbId: number, page = 1, language?: string) {
-    const response = await this.tmdb.getSimilar(tmdbId, page, language);
-    return filterTmdbResponse(response);
+  async getSimilar(tmdbId: number, page = 1, language?: string, contentFilter?: ContentFilterOptions) {
+    const response = await this.tmdb.getSimilar(tmdbId, page, language, contentFilter);
+    return filterTmdbResponse(response, contentFilter);
   }
 
   async getGenres(language?: string) {
