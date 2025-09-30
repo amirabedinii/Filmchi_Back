@@ -130,15 +130,47 @@ export class RecommendationsService {
       'Recommendations: enriched recommendations count',
     );
 
+    // Debug: show poster_path values before filtering
+    Logger.debug(
+      { posterPaths: enriched.map(r => r.posterPath) },
+      'Recommendations: poster_path values before filtering',
+    );
+
+    // Debug: show full movie objects before filtering
+    Logger.debug(
+      { enrichedMovies: enriched },
+      'Recommendations: full movie objects before filtering',
+    );
+
+    // Debug: check what properties are actually present
+    Logger.debug(
+      { properties: enriched.map(r => Object.keys(r)) },
+      'Recommendations: object properties before filtering',
+    );
+
     // Filter out recommendations with null poster_path
-    const filteredRecommendations = filterMoviesWithPoster(enriched);
+    // Note: The filter function expects 'poster_path' but we have 'posterPath'
+    // Temporarily map the property for debugging
+    const moviesForFiltering = enriched.map(movie => ({
+      ...movie,
+      poster_path: movie.posterPath
+    }));
+    
+    const filteredRecommendations = filterMoviesWithPoster(moviesForFiltering);
+    
+    // Map back to the original structure
+    const finalRecommendations = filteredRecommendations.map(movie => ({
+      ...movie,
+      posterPath: movie.poster_path,
+      poster_path: undefined // remove the temporary property
+    }));
     
     Logger.debug(
-      { filteredCount: filteredRecommendations.length },
+      { filteredCount: finalRecommendations.length },
       'Recommendations: filtered recommendations count',
     );
 
-    return filteredRecommendations;
+    return finalRecommendations;
   }
 
   private async findOnTmdb(title: string, year?: number, language?: string): Promise<any | null> {
