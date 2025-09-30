@@ -47,7 +47,14 @@ export class TmdbService {
   async request<T = any>(method: HttpMethod, path: string, params?: any, data?: any): Promise<T> {
     const url = this.buildUrl(path);
     const headers = this.authHeaders();
-    const observable = this.http.request<T>({ method, url, headers: headers as any, params, data });
+    const observable = this.http.request<T>({ 
+      method, 
+      url, 
+      headers: headers as any, 
+      params, 
+      data,
+      timeout: 100000 // 100 seconds timeout
+    });
     const response = await firstValueFrom(observable);
     return response.data as T;
   }

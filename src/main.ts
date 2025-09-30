@@ -6,7 +6,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, { 
+    bufferLogs: true,
+    // Set global timeout for all requests
+    bodyParser: true,
+    rawBody: true,
+  });
   app.useLogger(app.get(Logger));
   app.use(helmet());
   app.enableCors({
@@ -20,6 +25,13 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  
+  // Set request timeout
+  app.use((req, res, next) => {
+    req.setTimeout(60000); // 60 seconds
+    res.setTimeout(60000); // 60 seconds
+    next();
+  });
 
   const config = new DocumentBuilder()
     .setTitle('Filmchi API')

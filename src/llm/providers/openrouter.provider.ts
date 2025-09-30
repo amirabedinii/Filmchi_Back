@@ -46,6 +46,7 @@ export class OpenRouterProvider extends BaseLLMProvider {
     this.openai = new OpenAI({
       baseURL,
       apiKey,
+      timeout: 30000, // 30 seconds timeout
       defaultHeaders: {
         ...(siteUrl && { 'HTTP-Referer': siteUrl }),
         ...(siteName && { 'X-Title': siteName }),

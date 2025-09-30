@@ -98,34 +98,40 @@ export class RecommendationsService {
       return minimal;
     }
 
-    const enriched: EnrichedRecommendation[] = (
-      await Promise.all(
-        rawRecs.map(async (rec) => {
-          try {
-            const tmdb = await this.findOnTmdb(rec.title, rec.year, language, contentFilter);
-            if (!tmdb) {
-              Logger.debug(
-                { title: rec.title, year: rec.year },
-                'Recommendations: TMDB match not found',
-              );
-              return null;
-            }
-            return {
-              ...rec,
-              tmdbId: tmdb.id,
-              posterPath: tmdb.poster_path,
-              overview: tmdb.overview,
-            } as EnrichedRecommendation;
-          } catch (error: any) {
-            Logger.warn(
-              { err: error?.message, title: rec.title, year: rec.year },
-              'TMDB enrichment failed',
+    // Process TMDB enrichment with timeout and concurrency limit
+    const enriched: EnrichedRecommendation[] = [];
+    const concurrencyLimit = 3; // Limit concurrent TMDB requests
+    
+    for (let i = 0; i < rawRecs.length; i += concurrencyLimit) {
+      const batch = rawRecs.slice(i, i + concurrencyLimit);
+      const batchPromises = batch.map(async (rec) => {
+        try {
+          const tmdb = await this.findOnTmdb(rec.title, rec.year, language, contentFilter);
+          if (!tmdb) {
+            Logger.debug(
+              { title: rec.title, year: rec.year },
+              'Recommendations: TMDB match not found',
             );
             return null;
           }
-        }),
-      )
-    ).filter(Boolean) as EnrichedRecommendation[];
+          return {
+            ...rec,
+            tmdbId: tmdb.id,
+            posterPath: tmdb.poster_path,
+            overview: tmdb.overview,
+          } as EnrichedRecommendation;
+        } catch (error: any) {
+          Logger.warn(
+            { err: error?.message, title: rec.title, year: rec.year },
+            'TMDB enrichment failed',
+          );
+          return null;
+        }
+      });
+      
+      const batchResults = await Promise.all(batchPromises);
+      enriched.push(...batchResults.filter(Boolean) as EnrichedRecommendation[]);
+    }
 
     Logger.debug(
       { enrichedCount: enriched.length },
@@ -177,7 +183,14 @@ export class RecommendationsService {
 
   private async findOnTmdb(title: string, year?: number, language?: string, contentFilter?: ContentFilterOptions): Promise<any | null> {
     try {
-      const searchResp = await this.tmdb.searchMovie(title, year, 1, language, contentFilter);
+      // Add timeout wrapper for TMDB requests
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('TMDB request timeout')), 8000)
+      );
+      
+      const searchPromise = this.tmdb.searchMovie(title, year, 1, language, contentFilter);
+      const searchResp = await Promise.race([searchPromise, timeoutPromise]) as any;
+      
       const results = Array.isArray(searchResp?.results)
         ? searchResp.results
         : [];
@@ -188,7 +201,9 @@ export class RecommendationsService {
 
       const best = this.pickBestTmdbMatch(title, year, results);
       if (!best) return null;
-      const detailsResp = await this.tmdb.getMovieDetails(best.id, language);
+      
+      const detailsPromise = this.tmdb.getMovieDetails(best.id, language);
+      const detailsResp = await Promise.race([detailsPromise, timeoutPromise]) as any;
       
       // Apply additional content filtering on the movie details if needed
       if (contentFilter && detailsResp) {
