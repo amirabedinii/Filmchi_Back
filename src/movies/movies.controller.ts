@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Post, Query, Body, UseGuards } from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { ListsService } from '../lists/lists.service';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import type { Request } from 'express';
@@ -12,6 +13,13 @@ const CurrentUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): ReqUser => {
     const request = ctx.switchToHttp().getRequest<Request>();
     return request.user as ReqUser;
+  },
+);
+
+const OptionalUser = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext): ReqUser | undefined => {
+    const request = ctx.switchToHttp().getRequest<Request>();
+    return request.user as ReqUser | undefined;
   },
 );
 
@@ -101,10 +109,15 @@ export class MoviesController {
     });
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Get(':tmdbId')
-  async details(@Param('tmdbId') tmdbId: string, @Query('lang') lang?: string) {
+  async details(
+    @Param('tmdbId') tmdbId: string,
+    @Query('lang') lang?: string,
+    @OptionalUser() user?: ReqUser,
+  ) {
     const language = validateLanguage(lang);
-    return this.movies.getMovieDetails(Number(tmdbId), language);
+    return this.movies.getMovieDetails(Number(tmdbId), language, user?.userId);
   }
 
   @Get(':tmdbId/similar')

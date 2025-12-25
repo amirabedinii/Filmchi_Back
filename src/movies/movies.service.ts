@@ -58,9 +58,24 @@ export class MoviesService {
     return filterTmdbResponse(response, options.contentFilter);
   }
 
-  async getMovieDetails(tmdbId: number, language?: string) {
+  async getMovieDetails(tmdbId: number, language?: string, userId?: string) {
     const movie = await this.tmdb.getMovieDetails(tmdbId, language);
-    return filterSingleMovie(movie);
+    const filteredMovie = filterSingleMovie(movie);
+    
+    // If user is authenticated, fetch their rating
+    if (userId) {
+      const userRating = await this.ratingRepo.findOne({
+        where: { userId, tmdbId },
+      });
+      if (userRating) {
+        return {
+          ...filteredMovie,
+          user_rating: userRating.rating,
+        };
+      }
+    }
+    
+    return filteredMovie;
   }
 
   async getList(kind: 'trending' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming', page = 1, language?: string, contentFilter?: ContentFilterOptions) {

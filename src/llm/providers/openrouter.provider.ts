@@ -92,6 +92,9 @@ export class OpenRouterProvider extends BaseLLMProvider {
     }
 
     try {
+      // Generate a random seed to prevent caching and ensure varied responses
+      const randomSeed = Math.floor(Math.random() * 1000000);
+      
       const completion = await this.retryWithBackoff(
         () =>
           this.openai.chat.completions.create({
@@ -104,6 +107,7 @@ export class OpenRouterProvider extends BaseLLMProvider {
             ],
             max_tokens: request.maxTokens || 2048,
             temperature: request.temperature || 0.7,
+            seed: randomSeed,
             response_format: request.schema
               ? { type: 'json_object' }
               : undefined,

@@ -134,30 +134,40 @@ export class LLMService {
     // Determine if response should be in Persian
     const isPersian = language === 'fa' || language === 'persian' || language === 'farsi';
     const languageInstruction = isPersian 
-      ? '\n\nIMPORTANT: Write ALL recommendation reasons ("reason" field) in Persian/Farsi language. The movie titles should remain in their original English form, but explanations must be in Persian.'
+      ? '\n\n🎬 PERSIAN LANGUAGE REQUIREMENTS:\n- Write ALL recommendation reasons ("reason" field) in Persian/Farsi language\n- Movie titles remain in their original form (English/Persian)\n- Include 2-3 Iranian/Persian films in your recommendations (films from Iran cinema)\n- Mix Iranian cinema with international films to provide variety\n- Consider classic and contemporary Iranian films based on the user\'s request'
       : '';
 
+    // Add unique request ID to prevent caching
+    const requestId = `REQ-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    
     return [
       'You are an expert movie recommendation engine with deep knowledge of cinema across all genres, eras, and cultures.',
       'You have exceptional understanding of human emotions and can recommend movies that match specific moods and feelings.',
+      'You understand and respect what users explicitly ask for - if they want sad movies, you recommend sad movies.',
+      '',
+      `[Request ID: ${requestId}]`,
       '',
       `User's viewing history: ${historyStr || 'No previous viewing history available'}`,
       '',
-      `User's current emotional state and request: "${userQuery}"`,
+      `User's EXACT request: "${userQuery}"`,
       '',
-      `Please recommend ${maxRecommendations} movies that match the user's emotional state and request.`,
+      `Your task: Recommend ${maxRecommendations} movies that PRECISELY match what the user asked for in their request above.`,
+      'READ THEIR REQUEST CAREFULLY - recommend exactly what they want, not what you think they need.',
       '',
       'CRITICAL GUIDELINES:',
-      '- CAREFULLY analyze the user\'s emotional state from their request',
-      '- If the user feels sad, down, or unwell, recommend UPLIFTING, COMFORTING, and FEEL-GOOD movies',
-      '- AVOID complex, mind-bending, or emotionally heavy films when user needs comfort',
-      '- Recommend movies that can genuinely improve their mood',
+      '- CAREFULLY read and understand EXACTLY what the user is asking for',
+      '- If the user asks for sad/emotional/tragic films, recommend SAD and EMOTIONAL movies - DO NOT try to "cheer them up"',
+      '- If the user asks for happy/uplifting films, recommend HAPPY and UPLIFTING movies',
+      '- RESPECT the user\'s explicit request - they know what they want to watch',
+      '- Match the MOOD and GENRE they specifically request, not what you think they need',
+      '- Consider the user\'s viewing history and preferences when selecting movies',
+      '- If the user writes in Persian/Farsi, include Iranian/Persian cinema in recommendations (mix with international films)',
+      '- For Persian language queries, recommend 2-3 Iranian films alongside international films',
       '- Provide a mix of popular and hidden gem films',
       '- Include movies from different time periods when appropriate',
-      '- Ensure each recommendation has a clear, compelling reason that explains HOW it matches their emotional needs',
-      "- Avoid recommending movies that appear to be in the user's history",
+      '- Ensure each recommendation has a clear, compelling reason that explains HOW it matches their REQUEST',
+      "- Avoid recommending movies that appear in the user's history",
       '- Include release year when known',
-      '- Prioritize emotional resonance over intellectual complexity when user needs comfort',
       languageInstruction,
       '',
       'Return your response as JSON strictly matching the provided schema.',
