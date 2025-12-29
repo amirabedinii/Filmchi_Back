@@ -61,7 +61,7 @@ export class MoviesService {
 
     const response = await this.tmdb.get('/search/movie', params);
 
-    return filterTmdbResponse(response, options.contentFilter);
+    return filterTmdbResponse(response, options.contentFilter, options.language);
   }
 
   async getMovieDetails(tmdbId: number, language?: string, userId?: string) {
@@ -111,7 +111,7 @@ export class MoviesService {
         response = await this.tmdb.getUpcoming(page, language, contentFilter);
         break;
     }
-    return filterTmdbResponse(response, contentFilter);
+    return filterTmdbResponse(response, contentFilter, language);
   }
 
   async getSimilar(
@@ -126,7 +126,7 @@ export class MoviesService {
       language,
       contentFilter,
     );
-    return filterTmdbResponse(response, contentFilter);
+    return filterTmdbResponse(response, contentFilter, language);
   }
 
   async getGenres(language?: string) {

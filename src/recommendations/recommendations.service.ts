@@ -207,7 +207,7 @@ export class RecommendationsService {
       
       // Apply additional content filtering on the movie details if needed
       if (contentFilter && detailsResp) {
-        const filteredResults = filterContent([detailsResp], contentFilter);
+        const filteredResults = filterContent([detailsResp], contentFilter, language);
         if (filteredResults.length === 0) {
           Logger.debug({ title, year }, 'Movie filtered out by content filter');
           return null;

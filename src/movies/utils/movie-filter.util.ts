@@ -2,6 +2,80 @@
  * Utility functions for filtering movie data
  */
 
+/**
+ * Language detection and filtering utilities
+ */
+
+/**
+ * Checks if a string contains Persian/Farsi characters
+ * @param text The text to check
+ * @returns true if the text contains Persian characters
+ */
+export function containsPersianChars(text: string): boolean {
+  if (!text || typeof text !== 'string') {
+    return false;
+  }
+  // Persian/Farsi Unicode range: \u0600-\u06FF
+  // This includes Arabic characters used in Persian
+  const persianRegex = /[\u0600-\u06FF]/;
+  return persianRegex.test(text);
+}
+
+/**
+ * Checks if a string contains English/Latin characters
+ * @param text The text to check
+ * @returns true if the text contains English characters
+ */
+export function containsEnglishChars(text: string): boolean {
+  if (!text || typeof text !== 'string') {
+    return false;
+  }
+  // English/Latin characters: a-z, A-Z
+  const englishRegex = /[a-zA-Z]/;
+  return englishRegex.test(text);
+}
+
+/**
+ * Checks if a movie title aligns with the requested language
+ * - If language is 'fa' (Persian): title should only contain Persian characters
+ * - If language is 'en' (English): title should only contain English characters
+ * @param title The movie title to check
+ * @param originalTitle The original title (fallback if title is empty)
+ * @param language The requested language code (ISO 639-1)
+ * @returns true if the title aligns with the requested language
+ */
+export function isTitleAlignedWithLanguage(
+  title: string | null | undefined,
+  originalTitle: string | null | undefined,
+  language?: string,
+): boolean {
+  if (!language) {
+    return true; // No language filter, accept all
+  }
+
+  const normalizedLang = language.toLowerCase();
+  const titleToCheck = title || originalTitle || '';
+
+  if (!titleToCheck || titleToCheck.trim() === '') {
+    return true; // No title to check, accept it
+  }
+
+  // Persian language filter: title should only contain Persian characters
+  // (must have Persian chars and must not have English chars)
+  if (normalizedLang === 'fa' || normalizedLang === 'persian' || normalizedLang === 'farsi') {
+    return containsPersianChars(titleToCheck) && !containsEnglishChars(titleToCheck);
+  }
+
+  // English language filter: title should only contain English characters
+  // (must have English chars and must not have Persian chars)
+  if (normalizedLang === 'en' || normalizedLang === 'english') {
+    return containsEnglishChars(titleToCheck) && !containsPersianChars(titleToCheck);
+  }
+
+  // For other languages, accept all (can be extended later)
+  return true;
+}
+
 export interface MovieWithPoster {
   poster_path?: string | null;
   backdrop_path?: string | null;
@@ -55,6 +129,9 @@ export interface MovieWithCertification extends MovieWithPoster {
   keywords?: Array<{ id: number; name: string }>;
   origin_country?: string[]; // ISO 3166-1 alpha-2 codes
   production_countries?: Array<{ iso_3166_1: string; name: string }>; // Alternative format from TMDB details
+  title?: string;
+  original_title?: string;
+  original_language?: string; // ISO 639-1 language code (e.g., 'en', 'fa', 'ko')
 }
 
 /**
@@ -77,9 +154,14 @@ export function filterMoviesWithPoster<T extends MovieWithPoster>(movies: T[]): 
  * and optionally apply content filtering
  * @param response TMDB API response with results array
  * @param contentFilter Optional content filtering options
+ * @param language Optional language code to filter titles by language alignment
  * @returns Modified response with filtered results
  */
-export function filterTmdbResponse(response: any, contentFilter?: ContentFilterOptions): any {
+export function filterTmdbResponse(
+  response: any,
+  contentFilter?: ContentFilterOptions,
+  language?: string,
+): any {
   if (!response || !Array.isArray(response.results)) {
     return response;
   }
@@ -88,7 +170,7 @@ export function filterTmdbResponse(response: any, contentFilter?: ContentFilterO
   
   // Apply content filtering if provided
   if (contentFilter) {
-    filteredResults = filterSearchResults(filteredResults, contentFilter);
+    filteredResults = filterSearchResults(filteredResults, contentFilter, language);
   }
   
   // Add mobile backdrop paths to all results
@@ -117,11 +199,13 @@ export function filterSingleMovie<T extends MovieWithPoster>(movie: T | null): (
  * Filters movies based on content rating and adult content
  * @param movies Array of movie objects
  * @param options Content filtering options
+ * @param language Optional language code to filter titles by language alignment
  * @returns Filtered array of movies
  */
 export function filterContent<T extends MovieWithCertification>(
   movies: T[],
-  options: ContentFilterOptions = {}
+  options: ContentFilterOptions = {},
+  language?: string,
 ): T[] {
   if (!Array.isArray(movies)) {
     return [];
@@ -143,8 +227,7 @@ export function filterContent<T extends MovieWithCertification>(
     }
 
     // Filter by origin countries
-    // Only filter if origin country data is available in the response
-    // If origin country data is not available, we can't filter, so keep the movie
+    // If originCountries filter is set, we must verify the movie is from allowed countries
     if (originCountries.length > 0) {
       let movieOriginCountries: string[] = [];
       
@@ -157,7 +240,7 @@ export function filterContent<T extends MovieWithCertification>(
         movieOriginCountries = movie.production_countries.map(country => country.iso_3166_1);
       }
       
-      // Only filter if we have origin country data
+      // First, try to use origin country data if available (most accurate)
       if (movieOriginCountries.length > 0) {
         const hasMatchingOriginCountry = originCountries.some(country => 
           movieOriginCountries.includes(country)
@@ -165,8 +248,20 @@ export function filterContent<T extends MovieWithCertification>(
         if (!hasMatchingOriginCountry) {
           return false;
         }
+      } else {
+        // Fallback: use original_language as a proxy for country
+        // This is not perfect but better than excluding everything
+        // English (en) -> US, Persian/Farsi (fa) -> IR
+        const originalLang = movie.original_language?.toLowerCase();
+        const isEnglishMovie = originalLang === 'en' && originCountries.some(c => c.toLowerCase() === 'us');
+        const isPersianMovie = (originalLang === 'fa' || originalLang === 'persian' || originalLang === 'farsi') && 
+                               originCountries.some(c => c.toLowerCase() === 'ir');
+        
+        if (!isEnglishMovie && !isPersianMovie) {
+          // No origin country data and language doesn't match allowed countries
+          return false;
+        }
       }
-      // If origin country data is not available, we keep the movie (can't filter what we don't have)
     }
 
     // Filter by certification (if available)
@@ -200,6 +295,13 @@ export function filterContent<T extends MovieWithCertification>(
       }
     }
 
+    // Filter by title language alignment
+    if (language) {
+      if (!isTitleAlignedWithLanguage(movie.title, movie.original_title, language)) {
+        return false;
+      }
+    }
+
     return true;
   });
 }
@@ -211,6 +313,7 @@ export interface SearchMovieResult extends MovieWithPoster {
   adult?: boolean;
   genre_ids?: number[];
   origin_country?: string[]; // ISO 3166-1 alpha-2 codes
+  original_language?: string; // ISO 639-1 language code (e.g., 'en', 'fa', 'ko')
 }
 
 /**
@@ -218,9 +321,14 @@ export interface SearchMovieResult extends MovieWithPoster {
  * Used for /search/movie endpoint which doesn't support certification filtering
  * @param movies Array of movie objects from search results
  * @param options Content filtering options
+ * @param language Optional language code to filter titles by language alignment
  * @returns Filtered array of movies
  */
-export function filterSearchResults<T extends SearchMovieResult>(movies: T[], options: ContentFilterOptions = {}): T[] {
+export function filterSearchResults<T extends SearchMovieResult>(
+  movies: T[],
+  options: ContentFilterOptions = {},
+  language?: string,
+): T[] {
   if (!Array.isArray(movies)) {
     return [];
   }
@@ -239,17 +347,31 @@ export function filterSearchResults<T extends SearchMovieResult>(movies: T[], op
     }
 
     // Filter by origin countries
-    // Only filter if origin_country data is available in the response
-    // If origin_country is not available, we can't filter, so keep the movie
-    if (originCountries.length > 0 && movie.origin_country && Array.isArray(movie.origin_country) && movie.origin_country.length > 0) {
-      const hasMatchingOriginCountry = originCountries.some(country => 
-        movie.origin_country!.includes(country)
-      );
-      if (!hasMatchingOriginCountry) {
-        return false;
+    // If originCountries filter is set, we must verify the movie is from allowed countries
+    if (originCountries.length > 0) {
+      // First, try to use origin_country if available (most accurate)
+      if (movie.origin_country && Array.isArray(movie.origin_country) && movie.origin_country.length > 0) {
+        const hasMatchingOriginCountry = originCountries.some(country => 
+          movie.origin_country!.includes(country)
+        );
+        if (!hasMatchingOriginCountry) {
+          return false;
+        }
+      } else {
+        // Fallback: use original_language as a proxy for country
+        // This is not perfect but better than excluding everything
+        // English (en) -> US, Persian/Farsi (fa) -> IR
+        const originalLang = movie.original_language?.toLowerCase();
+        const isEnglishMovie = originalLang === 'en' && originCountries.some(c => c.toLowerCase() === 'us');
+        const isPersianMovie = (originalLang === 'fa' || originalLang === 'persian' || originalLang === 'farsi') && 
+                               originCountries.some(c => c.toLowerCase() === 'ir');
+        
+        if (!isEnglishMovie && !isPersianMovie) {
+          // No origin_country data and language doesn't match allowed countries
+          return false;
+        }
       }
     }
-    // If origin_country is not available, we keep the movie (can't filter what we don't have)
 
     // Filter by genres (using genre_ids from search results)
     if (excludeGenres.length > 0 && movie.genre_ids) {
@@ -273,6 +395,13 @@ export function filterSearchResults<T extends SearchMovieResult>(movies: T[], op
       });
       
       if (hasExcludedKeyword) {
+        return false;
+      }
+    }
+
+    // Filter by title language alignment
+    if (language) {
+      if (!isTitleAlignedWithLanguage(movie.title, movie.original_title, language)) {
         return false;
       }
     }
