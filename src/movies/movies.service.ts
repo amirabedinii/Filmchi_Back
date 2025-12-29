@@ -7,15 +7,22 @@ import { Repository } from 'typeorm';
 import { MovieRating } from '../entities/movie-rating.entity';
 import { MovieBookmark } from '../entities/movie-bookmark.entity';
 import { TmdbService } from './tmdb.service';
-import { filterTmdbResponse, filterSingleMovie, filterMoviesWithPoster, ContentFilterOptions, createTmdbFilterParams } from './utils/movie-filter.util';
+import {
+  filterTmdbResponse,
+  filterSingleMovie,
+  filterMoviesWithPoster,
+  ContentFilterOptions,
+  createTmdbFilterParams,
+  addMobileBackdrop,
+} from './utils/movie-filter.util';
 
 type SearchOptions = {
   query?: string;
   page?: number;
   year?: number;
-  withGenres?: string; // comma-separated ids
-  sortBy?: string; // popularity.desc, vote_average.desc, etc.
-  language?: string; // ISO 639-1 language code (e.g., 'fa', 'en')
+  withGenres?: string;
+  sortBy?: string;
+  language?: string;
   contentFilter?: ContentFilterOptions;
 };
 
@@ -31,8 +38,6 @@ export class MoviesService {
     private readonly bookmarkRepo: Repository<MovieBookmark>,
   ) {}
 
-  // Deprecated internal TMDB helpers are replaced by TmdbService
-
   async searchMovies(options: SearchOptions) {
     const page = options.page && options.page > 0 ? options.page : 1;
     const params: any = {
@@ -45,24 +50,28 @@ export class MoviesService {
     if (options.language) {
       params.language = options.language;
     }
-    
-    // Apply content filtering (only include_adult works on search endpoint)
+
     if (options.contentFilter) {
-      params.include_adult = options.contentFilter.includeAdult ?? false;
-      // Note: certification filtering doesn't work on /search/movie, only on /discover/movie
-      // We'll filter results after receiving them
+      const filterParams = createTmdbFilterParams(options.contentFilter);
+
+      if (filterParams.include_adult !== undefined) {
+        params.include_adult = filterParams.include_adult;
+      }
     }
-    
+
     const response = await this.tmdb.get('/search/movie', params);
-    // Apply post-filtering for content (keywords, genres, etc.)
+
     return filterTmdbResponse(response, options.contentFilter);
   }
 
   async getMovieDetails(tmdbId: number, language?: string, userId?: string) {
     const movie = await this.tmdb.getMovieDetails(tmdbId, language);
     const filteredMovie = filterSingleMovie(movie);
-    
-    // If user is authenticated, fetch their rating
+
+    if (!filteredMovie) {
+      return null;
+    }
+
     if (userId) {
       const userRating = await this.ratingRepo.findOne({
         where: { userId, tmdbId },
@@ -74,11 +83,16 @@ export class MoviesService {
         };
       }
     }
-    
+
     return filteredMovie;
   }
 
-  async getList(kind: 'trending' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming', page = 1, language?: string, contentFilter?: ContentFilterOptions) {
+  async getList(
+    kind: 'trending' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming',
+    page = 1,
+    language?: string,
+    contentFilter?: ContentFilterOptions,
+  ) {
     let response;
     switch (kind) {
       case 'trending':
@@ -100,8 +114,18 @@ export class MoviesService {
     return filterTmdbResponse(response, contentFilter);
   }
 
-  async getSimilar(tmdbId: number, page = 1, language?: string, contentFilter?: ContentFilterOptions) {
-    const response = await this.tmdb.getSimilar(tmdbId, page, language, contentFilter);
+  async getSimilar(
+    tmdbId: number,
+    page = 1,
+    language?: string,
+    contentFilter?: ContentFilterOptions,
+  ) {
+    const response = await this.tmdb.getSimilar(
+      tmdbId,
+      page,
+      language,
+      contentFilter,
+    );
     return filterTmdbResponse(response, contentFilter);
   }
 
@@ -120,9 +144,14 @@ export class MoviesService {
     return { tmdbId: saved.tmdbId, rating: saved.rating };
   }
 
-  async bookmarkMovie(userId: string, tmdbId: number, movieData?: { title?: string; posterPath?: string; releaseDate?: string }) {
-    // Check if already bookmarked
-    const existing = await this.bookmarkRepo.findOne({ where: { userId, tmdbId } });
+  async bookmarkMovie(
+    userId: string,
+    tmdbId: number,
+    movieData?: { title?: string; posterPath?: string; releaseDate?: string },
+  ) {
+    const existing = await this.bookmarkRepo.findOne({
+      where: { userId, tmdbId },
+    });
     if (existing) {
       return {
         id: existing.id,
@@ -135,7 +164,6 @@ export class MoviesService {
       };
     }
 
-    // Create new bookmark
     const bookmark = this.bookmarkRepo.create({
       userId,
       tmdbId,
@@ -157,7 +185,9 @@ export class MoviesService {
   }
 
   async unbookmarkMovie(userId: string, tmdbId: number) {
-    const bookmark = await this.bookmarkRepo.findOne({ where: { userId, tmdbId } });
+    const bookmark = await this.bookmarkRepo.findOne({
+      where: { userId, tmdbId },
+    });
     if (!bookmark) {
       return { isBookmarked: false };
     }
@@ -166,7 +196,10 @@ export class MoviesService {
     return { isBookmarked: false };
   }
 
-  async getUserBookmarks(userId: string, options?: { page?: number; limit?: number }) {
+  async getUserBookmarks(
+    userId: string,
+    options?: { page?: number; limit?: number },
+  ) {
     const page = options?.page && options.page > 0 ? options.page : 1;
     const limit = options?.limit && options.limit > 0 ? options.limit : 50;
 
@@ -177,19 +210,18 @@ export class MoviesService {
       take: limit,
     });
 
-    const mappedBookmarks = bookmarks.map(bookmark => ({
-      id: bookmark.tmdbId, // Use tmdbId as id to match TMDB format
+    const mappedBookmarks = bookmarks.map((bookmark) => ({
+      id: bookmark.tmdbId,
       title: bookmark.movieTitle,
       poster_path: bookmark.moviePosterPath,
       release_date: bookmark.movieReleaseDate,
-      // Add media_type to match trending format
+
       media_type: 'movie',
-      // Add bookmark-specific data
+
       bookmark_id: bookmark.id,
       bookmark_created_at: bookmark.createdAt,
     }));
 
-    // Filter out bookmarks with null poster_path
     const filteredBookmarks = filterMoviesWithPoster(mappedBookmarks);
 
     return {
@@ -201,9 +233,9 @@ export class MoviesService {
   }
 
   async isMovieBookmarked(userId: string, tmdbId: number) {
-    const bookmark = await this.bookmarkRepo.findOne({ where: { userId, tmdbId } });
+    const bookmark = await this.bookmarkRepo.findOne({
+      where: { userId, tmdbId },
+    });
     return { isBookmarked: !!bookmark };
   }
 }
-
-

@@ -4,7 +4,39 @@
 
 export interface MovieWithPoster {
   poster_path?: string | null;
+  backdrop_path?: string | null;
   [key: string]: any;
+}
+
+/**
+ * Builds a TMDB image URL with the specified size
+ * @param imagePath The image path from TMDB (e.g., "/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg")
+ * @param size The image size (e.g., "w300", "w780", "w1280", "original")
+ * @returns Full TMDB image URL or null if imagePath is invalid
+ */
+export function buildTmdbImageUrl(imagePath: string | null | undefined, size: string = 'original'): string | null {
+  if (!imagePath || imagePath === '') {
+    return null;
+  }
+  // Ensure the path starts with /
+  const normalizedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  return `https://image.tmdb.org/t/p/${size}${normalizedPath}`;
+}
+
+/**
+ * Adds mobile-friendly backdrop path to a movie object
+ * @param movie Movie object with backdrop_path
+ * @returns Movie object with backdrop_path_mobile added
+ */
+export function addMobileBackdrop<T extends MovieWithPoster>(movie: T): T & { backdrop_path_mobile?: string | null } {
+  if (!movie) {
+    return movie as T & { backdrop_path_mobile?: string | null };
+  }
+  
+  return {
+    ...movie,
+    backdrop_path_mobile: movie.backdrop_path ? buildTmdbImageUrl(movie.backdrop_path, 'w780') : null,
+  };
 }
 
 export interface ContentFilterOptions {
@@ -13,6 +45,7 @@ export interface ContentFilterOptions {
   certificationCountry?: string;
   excludeGenres?: number[];
   excludeKeywords?: string[];
+  originCountries?: string[]; // ISO 3166-1 alpha-2 codes (e.g., ['US', 'IR'])
 }
 
 export interface MovieWithCertification extends MovieWithPoster {
@@ -20,6 +53,8 @@ export interface MovieWithCertification extends MovieWithPoster {
   certification?: string;
   genres?: Array<{ id: number; name: string }>;
   keywords?: Array<{ id: number; name: string }>;
+  origin_country?: string[]; // ISO 3166-1 alpha-2 codes
+  production_countries?: Array<{ iso_3166_1: string; name: string }>; // Alternative format from TMDB details
 }
 
 /**
@@ -56,6 +91,9 @@ export function filterTmdbResponse(response: any, contentFilter?: ContentFilterO
     filteredResults = filterSearchResults(filteredResults, contentFilter);
   }
   
+  // Add mobile backdrop paths to all results
+  filteredResults = filteredResults.map((movie: any) => addMobileBackdrop(movie));
+  
   return {
     ...response,
     results: filteredResults,
@@ -66,13 +104,13 @@ export function filterTmdbResponse(response: any, contentFilter?: ContentFilterO
 /**
  * Filters a single movie object, returns null if no poster_path
  * @param movie Movie object
- * @returns Movie object if it has poster_path, null otherwise
+ * @returns Movie object if it has poster_path, null otherwise, with mobile backdrop added
  */
-export function filterSingleMovie<T extends MovieWithPoster>(movie: T | null): T | null {
+export function filterSingleMovie<T extends MovieWithPoster>(movie: T | null): (T & { backdrop_path_mobile?: string | null }) | null {
   if (!movie || movie.poster_path === null || movie.poster_path === undefined || movie.poster_path === '') {
     return null;
   }
-  return movie;
+  return addMobileBackdrop(movie);
 }
 
 /**
@@ -94,13 +132,41 @@ export function filterContent<T extends MovieWithCertification>(
     maxCertification,
     certificationCountry = 'US',
     excludeGenres = [],
-    excludeKeywords = []
+    excludeKeywords = [],
+    originCountries = []
   } = options;
 
   return movies.filter(movie => {
     // Filter adult content
     if (!includeAdult && movie.adult === true) {
       return false;
+    }
+
+    // Filter by origin countries
+    // Only filter if origin country data is available in the response
+    // If origin country data is not available, we can't filter, so keep the movie
+    if (originCountries.length > 0) {
+      let movieOriginCountries: string[] = [];
+      
+      // Check origin_country array (from search/list endpoints)
+      if (movie.origin_country && Array.isArray(movie.origin_country)) {
+        movieOriginCountries = movie.origin_country;
+      }
+      // Check production_countries array (from details endpoint)
+      else if (movie.production_countries && Array.isArray(movie.production_countries)) {
+        movieOriginCountries = movie.production_countries.map(country => country.iso_3166_1);
+      }
+      
+      // Only filter if we have origin country data
+      if (movieOriginCountries.length > 0) {
+        const hasMatchingOriginCountry = originCountries.some(country => 
+          movieOriginCountries.includes(country)
+        );
+        if (!hasMatchingOriginCountry) {
+          return false;
+        }
+      }
+      // If origin country data is not available, we keep the movie (can't filter what we don't have)
     }
 
     // Filter by certification (if available)
@@ -144,6 +210,7 @@ export interface SearchMovieResult extends MovieWithPoster {
   overview?: string;
   adult?: boolean;
   genre_ids?: number[];
+  origin_country?: string[]; // ISO 3166-1 alpha-2 codes
 }
 
 /**
@@ -161,7 +228,8 @@ export function filterSearchResults<T extends SearchMovieResult>(movies: T[], op
   const {
     includeAdult = false,
     excludeGenres = [],
-    excludeKeywords = []
+    excludeKeywords = [],
+    originCountries = []
   } = options;
 
   return movies.filter(movie => {
@@ -169,6 +237,19 @@ export function filterSearchResults<T extends SearchMovieResult>(movies: T[], op
     if (!includeAdult && movie.adult === true) {
       return false;
     }
+
+    // Filter by origin countries
+    // Only filter if origin_country data is available in the response
+    // If origin_country is not available, we can't filter, so keep the movie
+    if (originCountries.length > 0 && movie.origin_country && Array.isArray(movie.origin_country) && movie.origin_country.length > 0) {
+      const hasMatchingOriginCountry = originCountries.some(country => 
+        movie.origin_country!.includes(country)
+      );
+      if (!hasMatchingOriginCountry) {
+        return false;
+      }
+    }
+    // If origin_country is not available, we keep the movie (can't filter what we don't have)
 
     // Filter by genres (using genre_ids from search results)
     if (excludeGenres.length > 0 && movie.genre_ids) {
@@ -212,7 +293,8 @@ export function createTmdbFilterParams(options: ContentFilterOptions = {}): Reco
     includeAdult = false,
     maxCertification,
     certificationCountry = 'US',
-    excludeGenres = []
+    excludeGenres = [],
+    originCountries = []
   } = options;
 
   // Adult content filter
@@ -229,20 +311,19 @@ export function createTmdbFilterParams(options: ContentFilterOptions = {}): Reco
     params.without_genres = excludeGenres.join(',');
   }
 
+  if (originCountries.length > 0) {
+    params.with_origin_country = originCountries.join(',');
+  }
+
   return params;
 }
 
-/**
- * Default content filter for Iranian audiences
- * Filters adult content and excludes explicit genres
- */
+
 export const IRANIAN_CONTENT_FILTER: ContentFilterOptions = {
   includeAdult: false,
   maxCertification: 'PG-13',
   certificationCountry: 'US',
-  // Exclude adult-oriented genres (IDs from TMDB)
-  // No specific adult genre IDs, as adult content is filtered by adult flag
   excludeGenres: [],
-  // Filter explicit keywords in titles/overviews
-  excludeKeywords: ['sex', 'porn', 'erotic', 'xxx', 'adult']
+  excludeKeywords: ['sex', 'porn', 'erotic', 'xxx', 'adult'],
+  originCountries: ['US', 'IR' , 'us' , 'ir']
 };
