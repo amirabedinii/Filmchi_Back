@@ -12,6 +12,7 @@ import { UsersModule } from './users/users.module';
 import { MoviesModule } from './movies/movies.module';
 import { APP_GUARD } from '@nestjs/core';
 import * as Joi from 'joi';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -60,6 +61,12 @@ import * as Joi from 'joi';
         OPENROUTER_API_KEY: Joi.string().allow('').optional(),
         OPENROUTER_MODEL: Joi.string().default('openai/gpt-4o-mini'),
         PORT: Joi.number().default(3001),
+        // Redis configuration
+        REDIS_HOST: Joi.string().default('localhost'),
+        REDIS_PORT: Joi.number().default(6379),
+        REDIS_PASSWORD: Joi.string().allow('').optional(),
+        REDIS_DB: Joi.number().default(0),
+        CACHE_ENABLED: Joi.boolean().default(true),
       }),
     }),
     ThrottlerModule.forRoot({
@@ -85,6 +92,7 @@ import * as Joi from 'joi';
         } as any;
       },
     }),
+    CacheModule,
     AuthModule,
     ListsModule,
     RecommendationsModule,
@@ -100,4 +108,4 @@ import * as Joi from 'joi';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

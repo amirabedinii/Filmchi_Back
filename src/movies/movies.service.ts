@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
@@ -15,6 +15,8 @@ import {
   createTmdbFilterParams,
   addMobileBackdrop,
 } from './utils/movie-filter.util';
+import type { ICacheProvider } from '../cache/cache.interface';
+import { CACHE_PROVIDER } from '../cache/cache.interface';
 
 type SearchOptions = {
   query?: string;
@@ -28,6 +30,14 @@ type SearchOptions = {
 
 @Injectable()
 export class MoviesService {
+  // Cache TTL values in seconds
+  private readonly CACHE_TTL = {
+    MOVIE_DETAILS: 24 * 60 * 60, // 24 hours
+    MOVIE_LISTS: 60 * 60, // 1 hour
+    SEARCH_RESULTS: 30 * 60, // 30 minutes
+    GENRES: 7 * 24 * 60 * 60, // 7 days
+  };
+
   constructor(
     private readonly http: HttpService,
     private readonly config: ConfigService,
@@ -36,9 +46,75 @@ export class MoviesService {
     private readonly ratingRepo: Repository<MovieRating>,
     @InjectRepository(MovieBookmark)
     private readonly bookmarkRepo: Repository<MovieBookmark>,
-  ) {}
+    @Inject(CACHE_PROVIDER)
+    private readonly cache: ICacheProvider,
+  ) { }
+
+  /**
+   * Generate cache key for movie searches
+   */
+  private getSearchCacheKey(options: SearchOptions): string {
+    const parts = [
+      'movie:search',
+      options.query || '',
+      options.page || 1,
+      options.year || '',
+      options.withGenres || '',
+      options.sortBy || '',
+      options.language || 'en',
+      JSON.stringify(options.contentFilter || {}),
+    ];
+    return parts.join(':');
+  }
+
+  /**
+   * Generate cache key for movie details
+   */
+  private getMovieDetailsCacheKey(tmdbId: number, language?: string): string {
+    return `movie:details:${tmdbId}:${language || 'en'}`;
+  }
+
+  /**
+   * Generate cache key for movie lists
+   */
+  private getListCacheKey(
+    kind: string,
+    page: number,
+    language?: string,
+    contentFilter?: ContentFilterOptions,
+  ): string {
+    return `movie:list:${kind}:${page}:${language || 'en'}:${JSON.stringify(contentFilter || {})}`;
+  }
+
+  /**
+   * Generate cache key for similar movies
+   */
+  private getSimilarCacheKey(
+    tmdbId: number,
+    page: number,
+    language?: string,
+    contentFilter?: ContentFilterOptions,
+  ): string {
+    return `movie:similar:${tmdbId}:${page}:${language || 'en'}:${JSON.stringify(contentFilter || {})}`;
+  }
+
+  /**
+   * Generate cache key for genres
+   */
+  private getGenresCacheKey(language?: string): string {
+    return `movie:genres:${language || 'en'}`;
+  }
 
   async searchMovies(options: SearchOptions) {
+    const cacheKey = this.getSearchCacheKey(options);
+
+    // Try to get from cache
+    const cached = await this.cache.get<any>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // Cache miss - fetch from TMDB
     const page = options.page && options.page > 0 ? options.page : 1;
     const params: any = {
       query: options.query,
@@ -60,11 +136,26 @@ export class MoviesService {
     }
 
     const response = await this.tmdb.get('/search/movie', params);
+    const result = filterTmdbResponse(response, options.contentFilter, options.language);
 
-    return filterTmdbResponse(response, options.contentFilter, options.language);
+    // Cache the result
+    await this.cache.set(cacheKey, result, this.CACHE_TTL.SEARCH_RESULTS);
+
+    return result;
   }
 
   async getMovieDetails(tmdbId: number, language?: string, userId?: string) {
+    const cacheKey = this.getMovieDetailsCacheKey(tmdbId, language);
+
+    // Try to get from cache (only if no userId - user-specific data shouldn't be cached)
+    if (!userId) {
+      const cached = await this.cache.get<any>(cacheKey);
+      if (cached) {
+        return cached;
+      }
+    }
+
+    // Cache miss - fetch from TMDB
     const movie = await this.tmdb.getMovieDetails(tmdbId, language);
     const filteredMovie = filterSingleMovie(movie);
 
@@ -84,6 +175,11 @@ export class MoviesService {
       }
     }
 
+    // Cache the result (only if no userId)
+    if (!userId) {
+      await this.cache.set(cacheKey, filteredMovie, this.CACHE_TTL.MOVIE_DETAILS);
+    }
+
     return filteredMovie;
   }
 
@@ -93,6 +189,15 @@ export class MoviesService {
     language?: string,
     contentFilter?: ContentFilterOptions,
   ) {
+    const cacheKey = this.getListCacheKey(kind, page, language, contentFilter);
+
+    // Try to get from cache
+    const cached = await this.cache.get<any>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // Cache miss - fetch from TMDB
     let response;
     switch (kind) {
       case 'trending':
@@ -111,7 +216,12 @@ export class MoviesService {
         response = await this.tmdb.getUpcoming(page, language, contentFilter);
         break;
     }
-    return filterTmdbResponse(response, contentFilter, language);
+    const result = filterTmdbResponse(response, contentFilter, language);
+
+    // Cache the result
+    await this.cache.set(cacheKey, result, this.CACHE_TTL.MOVIE_LISTS);
+
+    return result;
   }
 
   async getSimilar(
@@ -120,17 +230,45 @@ export class MoviesService {
     language?: string,
     contentFilter?: ContentFilterOptions,
   ) {
+    const cacheKey = this.getSimilarCacheKey(tmdbId, page, language, contentFilter);
+
+    // Try to get from cache
+    const cached = await this.cache.get<any>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // Cache miss - fetch from TMDB
     const response = await this.tmdb.getSimilar(
       tmdbId,
       page,
       language,
       contentFilter,
     );
-    return filterTmdbResponse(response, contentFilter, language);
+    const result = filterTmdbResponse(response, contentFilter, language);
+
+    // Cache the result
+    await this.cache.set(cacheKey, result, this.CACHE_TTL.MOVIE_LISTS);
+
+    return result;
   }
 
   async getGenres(language?: string) {
-    return this.tmdb.getGenres(language);
+    const cacheKey = this.getGenresCacheKey(language);
+
+    // Try to get from cache
+    const cached = await this.cache.get<any>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    // Cache miss - fetch from TMDB
+    const result = await this.tmdb.getGenres(language);
+
+    // Cache the result
+    await this.cache.set(cacheKey, result, this.CACHE_TTL.GENRES);
+
+    return result;
   }
 
   async setUserRating(userId: string, tmdbId: number, rating: number) {
