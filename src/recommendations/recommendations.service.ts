@@ -23,7 +23,7 @@ export class RecommendationsService {
     private readonly listsService: ListsService,
     private readonly llmService: LLMService,
     private readonly tmdb: TmdbService,
-  ) {}
+  ) { }
 
   async getRecommendations(
     userId: string,
@@ -101,7 +101,7 @@ export class RecommendationsService {
     // Process TMDB enrichment with timeout and concurrency limit
     const enriched: EnrichedRecommendation[] = [];
     const concurrencyLimit = 3; // Limit concurrent TMDB requests
-    
+
     for (let i = 0; i < rawRecs.length; i += concurrencyLimit) {
       const batch = rawRecs.slice(i, i + concurrencyLimit);
       const batchPromises = batch.map(async (rec) => {
@@ -116,6 +116,7 @@ export class RecommendationsService {
           }
           return {
             ...rec,
+            title: tmdb.title || rec.title, // Use localized title from TMDB if available
             tmdbId: tmdb.id,
             posterPath: tmdb.poster_path,
             overview: tmdb.overview,
@@ -128,7 +129,7 @@ export class RecommendationsService {
           return null;
         }
       });
-      
+
       const batchResults = await Promise.all(batchPromises);
       enriched.push(...batchResults.filter(Boolean) as EnrichedRecommendation[]);
     }
@@ -163,16 +164,16 @@ export class RecommendationsService {
       ...movie,
       poster_path: movie.posterPath
     }));
-    
+
     const filteredRecommendations = filterMoviesWithPoster(moviesForFiltering);
-    
+
     // Map back to the original structure
     const finalRecommendations = filteredRecommendations.map(movie => ({
       ...movie,
       posterPath: movie.poster_path,
       poster_path: undefined // remove the temporary property
     }));
-    
+
     Logger.debug(
       { filteredCount: finalRecommendations.length },
       'Recommendations: filtered recommendations count',
@@ -184,13 +185,13 @@ export class RecommendationsService {
   private async findOnTmdb(title: string, year?: number, language?: string, contentFilter?: ContentFilterOptions): Promise<any | null> {
     try {
       // Add timeout wrapper for TMDB requests
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('TMDB request timeout')), 8000)
       );
-      
+
       const searchPromise = this.tmdb.searchMovie(title, year, 1, language, contentFilter);
       const searchResp = await Promise.race([searchPromise, timeoutPromise]) as any;
-      
+
       const results = Array.isArray(searchResp?.results)
         ? searchResp.results
         : [];
@@ -201,10 +202,10 @@ export class RecommendationsService {
 
       const best = this.pickBestTmdbMatch(title, year, results);
       if (!best) return null;
-      
+
       const detailsPromise = this.tmdb.getMovieDetails(best.id, language);
       const detailsResp = await Promise.race([detailsPromise, timeoutPromise]) as any;
-      
+
       // Apply additional content filtering on the movie details if needed
       if (contentFilter && detailsResp) {
         const filteredResults = filterContent([detailsResp], contentFilter, language);
@@ -214,7 +215,7 @@ export class RecommendationsService {
         }
         return filteredResults[0];
       }
-      
+
       return detailsResp;
     } catch (error: any) {
       Logger.error({ err: error?.message, title, year }, 'TMDB request failed');
@@ -242,7 +243,7 @@ export class RecommendationsService {
       const titleScore =
         1 -
         this.levenshteinDistance(targetTitle, rTitle) /
-          Math.max(targetTitle.length || 1, rTitle.length || 1);
+        Math.max(targetTitle.length || 1, rTitle.length || 1);
       const yearScore =
         targetYear && rYear
           ? Math.abs(targetYear - rYear) <= 1
