@@ -9,6 +9,17 @@ describe('OllamaProvider', () => {
   let provider: OllamaProvider;
   let httpService: jest.Mocked<HttpService>;
   let configService: jest.Mocked<ConfigService>;
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    // Suppress console errors during tests
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+  });
+
+  afterAll(() => {
+    // Restore console errors after tests
+    consoleErrorSpy.mockRestore();
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -182,7 +193,7 @@ describe('OllamaProvider', () => {
       });
       httpService.post.mockReturnValue(of(mockResponse as any));
 
-      const result = await provider.generateCompletion<{ recommendations: Array<{ title: string; reason: string }>}>({
+      const result = await provider.generateCompletion<{ recommendations: Array<{ title: string; reason: string }> }>({
         prompt: 'p',
         temperature: 0.2,
         maxTokens: 10,

@@ -10,6 +10,17 @@ import {
 describe('LLMService', () => {
   let service: LLMService;
   let mockRepository: jest.Mocked<LLMRepository>;
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    // Suppress console errors during tests
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+  });
+
+  afterAll(() => {
+    // Restore console errors after tests
+    consoleErrorSpy.mockRestore();
+  });
 
   beforeEach(async () => {
     mockRepository = {
@@ -68,8 +79,11 @@ describe('LLMService', () => {
         expect.objectContaining({
           prompt: expect.stringContaining('action movies'),
           schema: expect.any(Object),
-          temperature: 0.7,
+          temperature: 0.8,
           maxTokens: 2048,
+          metadata: expect.objectContaining({
+            language: undefined,
+          }),
         }),
         undefined,
       );

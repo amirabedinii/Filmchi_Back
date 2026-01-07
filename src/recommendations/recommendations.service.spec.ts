@@ -23,6 +23,23 @@ describe('RecommendationsService', () => {
   let httpService: jest.Mocked<HttpService>;
   let configService: ConfigService;
   let tmdbService: jest.Mocked<TmdbService>;
+  let consoleDebugSpy: jest.SpyInstance;
+  let consoleWarnSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeAll(() => {
+    // Suppress console logs during tests
+    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation(() => { });
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => { });
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+  });
+
+  afterAll(() => {
+    // Restore console logs after tests
+    consoleDebugSpy.mockRestore();
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
+  });
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -61,12 +78,20 @@ describe('RecommendationsService', () => {
   });
 
   it('fetches watched and watchlist history from ListsService', async () => {
-    listsService.getMoviesForList.mockResolvedValueOnce([
-      { tmdbId: 1, title: 'A' },
-    ]);
-    listsService.getMoviesForList.mockResolvedValueOnce([
-      { tmdbId: 2, title: 'B' },
-    ]);
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [{ tmdbId: 1, title: 'A' }],
+      total: 1,
+      page: 1,
+      limit: 50,
+      totalPages: 1,
+    });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [{ tmdbId: 2, title: 'B' }],
+      total: 1,
+      page: 1,
+      limit: 50,
+      totalPages: 1,
+    });
 
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
       recommendations: []
@@ -90,12 +115,20 @@ describe('RecommendationsService', () => {
   });
 
   it('constructs prompt using history and user query', async () => {
-    listsService.getMoviesForList.mockResolvedValueOnce([
-      { tmdbId: 10, title: 'Interstellar' },
-    ]);
-    listsService.getMoviesForList.mockResolvedValueOnce([
-      { tmdbId: 20, title: 'The Martian' },
-    ]);
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [{ tmdbId: 10, title: 'Interstellar' }],
+      total: 1,
+      page: 1,
+      limit: 50,
+      totalPages: 1,
+    });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [{ tmdbId: 20, title: 'The Martian' }],
+      total: 1,
+      page: 1,
+      limit: 50,
+      totalPages: 1,
+    });
 
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
       recommendations: []
@@ -111,8 +144,8 @@ describe('RecommendationsService', () => {
   });
 
   it('calls TMDB to enrich each recommendation and merges results', async () => {
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
 
     // LLM Service returns recommendations
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
@@ -141,8 +174,8 @@ describe('RecommendationsService', () => {
   });
 
   it('skips recommendations not found on TMDB', async () => {
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
 
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
       recommendations: [
@@ -158,8 +191,8 @@ describe('RecommendationsService', () => {
   });
 
   it('returns [] when LLM service throws', async () => {
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
     llmService.generateMovieRecommendations.mockRejectedValueOnce(
       new Error('LLM service error'),
     );
@@ -172,8 +205,8 @@ describe('RecommendationsService', () => {
     // Simulate missing TMDB auth
     (tmdbService.hasAuthConfigured as jest.Mock).mockReturnValueOnce(false);
 
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
       recommendations: [
         { title: 'Movie A', reason: 'test' },
@@ -191,8 +224,8 @@ describe('RecommendationsService', () => {
   it('uses bearer token path for TMDB when provided and handles TMDB error gracefully', async () => {
     // Leave auth configured; simulate details failure
 
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
       recommendations: [
         { title: 'X', year: 2015, reason: 'reason' },
@@ -216,8 +249,8 @@ describe('RecommendationsService', () => {
       return undefined;
     });
 
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
-    listsService.getMoviesForList.mockResolvedValueOnce([]);
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
       recommendations: [
         { title: 'Y', reason: 'r' },

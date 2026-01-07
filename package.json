@@ -103,6 +103,10 @@
       "/dist/"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "forceExit": true,
+    "setupFilesAfterEnv": [
+      "<rootDir>/test-setup.ts"
+    ]
   }
 }

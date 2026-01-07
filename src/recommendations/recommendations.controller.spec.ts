@@ -70,6 +70,12 @@ describe('RecommendationsController', () => {
       expect(recommendationsService.getRecommendations).toHaveBeenCalledWith(
         mockRequest.user.userId,
         body.query,
+        undefined,
+        expect.objectContaining({
+          includeAdult: false,
+          maxCertification: 'PG-13',
+          certificationCountry: 'US',
+        }),
       );
       expect(result).toEqual(mockRecommendations);
     });
@@ -86,6 +92,12 @@ describe('RecommendationsController', () => {
       expect(recommendationsService.getRecommendations).toHaveBeenCalledWith(
         mockRequest.user.userId,
         body.query,
+        undefined,
+        expect.objectContaining({
+          includeAdult: false,
+          maxCertification: 'PG-13',
+          certificationCountry: 'US',
+        }),
       );
       expect(result).toEqual([]);
     });
@@ -105,6 +117,12 @@ describe('RecommendationsController', () => {
       expect(recommendationsService.getRecommendations).toHaveBeenCalledWith(
         mockRequest.user.userId,
         body.query,
+        undefined,
+        expect.objectContaining({
+          includeAdult: false,
+          maxCertification: 'PG-13',
+          certificationCountry: 'US',
+        }),
       );
     });
 
@@ -127,6 +145,12 @@ describe('RecommendationsController', () => {
       expect(recommendationsService.getRecommendations).toHaveBeenCalledWith(
         'user-456',
         body.query,
+        undefined,
+        expect.objectContaining({
+          includeAdult: false,
+          maxCertification: 'PG-13',
+          certificationCountry: 'US',
+        }),
       );
     });
 
@@ -149,6 +173,12 @@ describe('RecommendationsController', () => {
         expect(recommendationsService.getRecommendations).toHaveBeenCalledWith(
           mockRequest.user.userId,
           query,
+          undefined,
+          expect.objectContaining({
+            includeAdult: false,
+            maxCertification: 'PG-13',
+            certificationCountry: 'US',
+          }),
         );
       }
 

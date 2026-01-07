@@ -16,15 +16,16 @@ describe('ListsService', () => {
     userId: 'user-1',
     listName: 'watchlist',
     createdAt: new Date(),
-  };
+  } as any;
 
   const mockListItem: ListItem = {
     id: 'item-1',
     movieListId: 'list-1',
     tmdbId: 123,
     title: 'Test Movie',
+    posterPath: null,
     addedAt: new Date(),
-  };
+  } as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -101,6 +102,7 @@ describe('ListsService', () => {
             id: mockListItem.id,
             tmdbId: mockListItem.tmdbId,
             title: mockListItem.title,
+            posterPath: mockListItem.posterPath,
             addedAt: mockListItem.addedAt,
           },
         ],
@@ -199,12 +201,14 @@ describe('ListsService', () => {
         movieListId: mockMovieList.id,
         tmdbId: addMovieDto.tmdbId,
         title: addMovieDto.title,
+        posterPath: null,
       });
       expect(listItemRepo.save).toHaveBeenCalledWith(mockListItem);
       expect(result).toEqual({
         id: mockListItem.id,
         tmdbId: mockListItem.tmdbId,
         title: mockListItem.title,
+        posterPath: mockListItem.posterPath,
         addedAt: mockListItem.addedAt,
       });
     });
@@ -230,6 +234,7 @@ describe('ListsService', () => {
         id: mockListItem.id,
         tmdbId: mockListItem.tmdbId,
         title: mockListItem.title,
+        posterPath: mockListItem.posterPath,
         addedAt: mockListItem.addedAt,
       });
     });
@@ -250,6 +255,7 @@ describe('ListsService', () => {
         id: mockListItem.id,
         tmdbId: mockListItem.tmdbId,
         title: mockListItem.title,
+        posterPath: mockListItem.posterPath,
         addedAt: mockListItem.addedAt,
       });
     });
