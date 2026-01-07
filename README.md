@@ -1,35 +1,36 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## Filmchi API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Filmchi is a NestJS backend that provides authentication, personal movie lists, and AI‑powered movie recommendations enriched with TMDB metadata.
 
 ## Project setup
 
 ```bash
 $ yarn install
 ```
+
+## Environment
+
+Set environment variables via `.env.development` (used by default), `.env.test` (tests), or `.env` (production):
+
+```
+NODE_ENV=development
+DATABASE_URL=postgres://user:pass@localhost:5432/filmchi
+JWT_SECRET=replace-with-16+chars
+JWT_EXPIRES_IN=1d
+REFRESH_JWT_SECRET=replace-with-16+chars
+REFRESH_JWT_EXPIRES_IN=7d
+TMDB_API_KEY=your_tmdb_key
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.1
+PORT=3001
+CORS_ORIGIN=http://localhost:3000
+```
+
+Notes:
+- In tests, an in-memory sqlite database is used automatically.
+- `TMDB_API_KEY` can be empty; recommendations enrichment will then simply skip TMDB.
+- Optionally set `TMDB_BEARER_TOKEN` to use TMDB v4 bearer auth (preferred). If present, it takes precedence over `TMDB_API_KEY`.
+- `OLLAMA_URL` is required for recommendations generation.
 
 ## Compile and run the project
 
@@ -44,6 +45,21 @@ $ yarn run start:dev
 $ yarn run start:prod
 ```
 
+API docs are available at `/docs` (Swagger).
+
+### Users (JWT required)
+
+Base path: `/users`
+
+- `GET /users/profile`: Get current user's profile.
+- `PUT /users/profile`: Update profile fields (e.g. `displayName`, `bio`, `location`, `avatarUrl`, favorites arrays).
+- `GET /users/stats`: Get counts of lists and items.
+- `PUT /users/preferences`: Update arbitrary account preferences object.
+- `PUT /users/privacy`: Update privacy settings object.
+- `PUT /users/activity`: Set activity status (e.g. `{ "status": "active" }`).
+- `GET /users/export`: Export user's data snapshot.
+- `DELETE /users/account`: Soft delete account (can be restored by admin).
+
 ## Run tests
 
 ```bash
@@ -57,42 +73,98 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
+## Logging
+
+This service uses structured logging via `nestjs-pino`:
+- In development: pretty printing is enabled.
+- In production: JSON logs at level `info`.
+
+Sensitive headers like `Authorization` are redacted. You can adjust log level via `NODE_ENV`.
+
+## API Overview
+
+### Auth
+
+Base path: `/auth`
+
+- `POST /auth/register`: Register a user.
+- `POST /auth/login`: Login with credentials. Returns access and refresh tokens.
+- `POST /auth/refresh`: Exchange a refresh token for a new access token.
+- `POST /auth/logout`: Invalidate a refresh token.
+
+### Lists (JWT required)
+
+Base path: `/lists`
+
+- `GET /lists/:listName`: Get list items.
+  - Query: `page?=1`, `limit?=50 (<=100)`, `sort?=addedAt:asc|desc`
+- `POST /lists/:listName`: Add a movie to a list.
+  - Body: `{ tmdbId: number, title: string, posterPath?: string, overview?: string, year?: number }`
+- `DELETE /lists/:listName/:tmdbId`: Remove a movie from a list.
+
+List names supported: `watchlist`, `watched` (extensible).
+
+### Recommendations (JWT required)
+
+Endpoint: `POST /recommendations`
+
+Body:
+
+```
+{ "query": "smart sci-fi" }
+```
+
+Behavior:
+- Generates 5–8 raw suggestions using Ollama at `OLLAMA_URL`.
+- Enriches suggestions from TMDB in parallel using `Promise.all` for performance.
+- Matching algorithm considers title similarity (Levenshtein), release year proximity, and popularity; single-result searches are accepted directly.
+- Error handling: failed or empty TMDB lookups are filtered out; errors are logged but do not fail the request.
+
+Returned items include: `title`, `year?`, `reason`, `tmdbId`, `posterPath?`, `overview?`.
+
+### Movies
+
+Base path: `/movies`
+
+- GET `/movies/search` — Search movies.
+  - Query: `q` (title), `year?`, `with_genres?`, `sort_by?`, `page?=1`
+- GET `/movies/:tmdbId` — Movie details by TMDB id.
+- GET `/movies/trending` — Trending (weekly).
+- GET `/movies/popular` — Popular.
+- GET `/movies/top-rated` — Top rated.
+- GET `/movies/now-playing` — Now playing.
+- GET `/movies/upcoming` — Upcoming.
+- GET `/movies/:tmdbId/similar` — Similar titles.
+- POST `/movies/:tmdbId/bookmark` — Auth required. Body: `{ title: string }`. Adds to `favorites` list (uses the same storage model as other lists; stores TMDB id).
+- POST `/movies/:tmdbId/rating` — Auth required. Body: `{ rating: 1..10 }`. Upserts a per‑user rating by `tmdbId`.
+
+Notes:
+- We keep and operate on TMDB ids for all movie references. No local movie table is required.
+- When `TMDB_BEARER_TOKEN` is configured, all TMDB requests use bearer headers; otherwise `TMDB_API_KEY` is appended as a query param.
+
+## Architecture
+
+- NestJS modular structure: `auth`, `lists`, `recommendations`, `llm`, `entities`.
+- Persistence via TypeORM; migrations in `src/migrations`.
+- Input validation via `class-validator` and global `ValidationPipe` (whitelist, forbid non-whitelisted, transform).
+- Security: `helmet`, CORS (configurable via `CORS_ORIGIN`), JWT auth guard.
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Ensure environment variables are configured. Run `yarn build` then `yarn start:prod`.
 
-```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
-```
+## Troubleshooting
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- 401 errors: ensure `Authorization: Bearer <accessToken>` header is present and valid.
+- 403/404 on lists: verify `listName` is correct and the item exists.
+- Recommendations empty: check `OLLAMA_URL`, `OLLAMA_MODEL`, and `TMDB_API_KEY`.
 
 ## Resources
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- NestJS docs: https://docs.nestjs.com
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT

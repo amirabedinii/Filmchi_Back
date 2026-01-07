@@ -1,0 +1,1250 @@
+{
+  "info": {
+    "name": "Filmchi API",
+    "_postman_id": "c3f9fb6e-1e7a-4c9d-bb6c-7e2a7c5c0f21",
+    "description": "Postman collection for Filmchi backend endpoints with Persian/Farsi language support. Use 'lang=fa' query parameter or language field in request body for Persian content.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "listName", "value": "watchlist" },
+    { "key": "tmdbId", "value": "603" },
+    { "key": "language", "value": "fa" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Ensure Authorization header uses latest accessToken",
+          "const token = pm.collectionVariables.get('accessToken');",
+          "if (token) {",
+          "  pm.request.headers.upsert({ key: 'Authorization', value: 'Bearer ' + token });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Healthcheck",
+      "item": [
+        {
+          "name": "GET /",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "GET /movies/search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/search?q=Matrix&page=1&year=1999&with_genres=28&sort_by=popularity.desc&lang={{language}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "search"],
+              "query": [
+                {"key": "q", "value": "Matrix"},
+                {"key": "page", "value": "1"},
+                {"key": "year", "value": "1999"},
+                {"key": "with_genres", "value": "28"},
+                {"key": "sort_by", "value": "popularity.desc"},
+                {"key": "lang", "value": "{{language}}"}
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Search Movies - Persian",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/movies/search?q=Matrix&lang=fa",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["movies", "search"],
+                  "query": [
+                    {"key": "q", "value": "Matrix"},
+                    {"key": "lang", "value": "fa"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "{\n  \"results\": [\n    {\n      \"id\": 603,\n      \"title\": \"ماتریکس\",\n      \"original_title\": \"The Matrix\",\n      \"overview\": \"برنامه‌نویس کامپیوتری نئو که در دنیای واقعی زندگی می‌کند، متوجه می‌شود که واقعیت چیزی است که او فکر می‌کرد.\",\n      \"poster_path\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\",\n      \"release_date\": \"1999-03-30\",\n      \"vote_average\": 8.2,\n      \"vote_count\": 23853,\n      \"genre_ids\": [28, 878]\n    }\n  ],\n  \"page\": 1,\n  \"total_pages\": 1,\n  \"total_results\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /movies/:tmdbId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}?lang={{language}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}"],
+              "query": [
+                {"key": "lang", "value": "{{language}}"}
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Movie Details - Persian",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/movies/603?lang=fa",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["movies", "603"],
+                  "query": [
+                    {"key": "lang", "value": "fa"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 603,\n  \"title\": \"ماتریکس\",\n  \"original_title\": \"The Matrix\",\n  \"overview\": \"برنامه‌نویس کامپیوتری نئو که در دنیای واقعی زندگی می‌کند، متوجه می‌شود که واقعیت چیزی است که او فکر می‌کرد. او توسط مورفیوس رهبر شورشیان درگیر جنگی علیه ماشین‌ها می‌شود.\",\n  \"poster_path\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\",\n  \"backdrop_path\": \"/fNG7i7RqMErkcqhohV2a6cV1Ehy.jpg\",\n  \"release_date\": \"1999-03-30\",\n  \"runtime\": 136,\n  \"vote_average\": 8.2,\n  \"vote_count\": 23853,\n  \"genres\": [\n    {\"id\": 28, \"name\": \"اکشن\"},\n    {\"id\": 878, \"name\": \"علمی تخیلی\"}\n  ],\n  \"production_companies\": [\n    {\"id\": 79, \"name\": \"Village Roadshow Pictures\"}\n  ],\n  \"budget\": 63000000,\n  \"revenue\": 463517383\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /movies/trending",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/trending?page=1&lang={{language}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "trending"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "lang", "value": "{{language}}"}
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Trending Movies - Persian",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/movies/trending?page=1&lang=fa",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["movies", "trending"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "lang", "value": "fa"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "{\n  \"results\": [\n    {\n      \"id\": 550,\n      \"title\": \"باشگاه مشت زنی\",\n      \"original_title\": \"Fight Club\",\n      \"overview\": \"یک کارمند بی‌خواب شرکت بیمه با یک فروشنده صابون آشنا می‌شود و باشگاه مشت زنی زیرزمینی تشکیل می‌دهند.\",\n      \"poster_path\": \"/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg\",\n      \"release_date\": \"1999-10-15\",\n      \"vote_average\": 8.4,\n      \"vote_count\": 27457\n    }\n  ],\n  \"page\": 1,\n  \"total_pages\": 500,\n  \"total_results\": 10000\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /movies/popular",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/popular?page=1&lang={{language}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "popular"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "lang", "value": "{{language}}"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/top-rated",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/top-rated?page=1&lang={{language}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "top-rated"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "lang", "value": "{{language}}"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/now-playing",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/now-playing?page=1&lang={{language}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "now-playing"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "lang", "value": "{{language}}"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/upcoming",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/upcoming?page=1&lang={{language}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "upcoming"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "lang", "value": "{{language}}"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/genres",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/genres?lang={{language}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "genres"],
+              "query": [
+                {"key": "lang", "value": "{{language}}"}
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Genres - Persian",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/movies/genres?lang=fa",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["movies", "genres"],
+                  "query": [
+                    {"key": "lang", "value": "fa"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "{\n  \"genres\": [\n    {\"id\": 28, \"name\": \"اکشن\"},\n    {\"id\": 12, \"name\": \"ماجراجویی\"},\n    {\"id\": 16, \"name\": \"انیمیشن\"},\n    {\"id\": 35, \"name\": \"کمدی\"},\n    {\"id\": 80, \"name\": \"جنایی\"},\n    {\"id\": 99, \"name\": \"مستند\"},\n    {\"id\": 18, \"name\": \"درام\"},\n    {\"id\": 10751, \"name\": \"خانوادگی\"},\n    {\"id\": 14, \"name\": \"فانتزی\"},\n    {\"id\": 36, \"name\": \"تاریخی\"},\n    {\"id\": 27, \"name\": \"ترسناک\"},\n    {\"id\": 10402, \"name\": \"موسیقی\"},\n    {\"id\": 9648, \"name\": \"راز\"},\n    {\"id\": 10749, \"name\": \"عاشقانه\"},\n    {\"id\": 878, \"name\": \"علمی تخیلی\"},\n    {\"id\": 10770, \"name\": \"فیلم تلویزیونی\"},\n    {\"id\": 53, \"name\": \"هیجانی\"},\n    {\"id\": 10752, \"name\": \"جنگی\"},\n    {\"id\": 37, \"name\": \"وسترن\"}\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /movies/:tmdbId/similar",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}/similar?page=1&lang={{language}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}", "similar"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "lang", "value": "{{language}}"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /movies/:tmdbId/bookmark (Protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"The Matrix\",\n  \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\",\n  \"releaseDate\": \"1999-03-30\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}/bookmark",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}", "bookmark"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /movies/:tmdbId/unbookmark (Protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}/unbookmark",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}", "unbookmark"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /movies/bookmarks (Protected)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/bookmarks?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "bookmarks"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"}
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "User Bookmarks",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/movies/bookmarks?page=1&limit=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["movies", "bookmarks"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "limit", "value": "20"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "{\n  \"page\": 1,\n  \"results\": [\n    {\n      \"id\": 603,\n      \"title\": \"The Matrix\",\n      \"poster_path\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\",\n      \"release_date\": \"1999-03-30\",\n      \"media_type\": \"movie\",\n      \"bookmark_id\": \"bookmark_1\",\n      \"bookmark_created_at\": \"2024-01-15T10:30:00.000Z\"\n    },\n    {\n      \"id\": 550,\n      \"title\": \"Fight Club\",\n      \"poster_path\": \"/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg\",\n      \"release_date\": \"1999-10-15\",\n      \"media_type\": \"movie\",\n      \"bookmark_id\": \"bookmark_2\",\n      \"bookmark_created_at\": \"2024-01-14T15:20:00.000Z\"\n    }\n  ],\n  \"total_pages\": 1,\n  \"total_results\": 2\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /movies/:tmdbId/bookmark-status (Protected)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}/bookmark-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}", "bookmark-status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /movies/:tmdbId/rating (Protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/movies/{{tmdbId}}/rating",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "{{tmdbId}}", "rating"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /auth/register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /auth/login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"secret123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Login returns 200', function () { pm.response.to.have.status(200); });",
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "if (json.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);",
+                  "if (json.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "Login Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"secret123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"user_123\",\n    \"email\": \"test@example.com\",\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Refresh returns 200', function () { pm.response.to.have.status(200); });",
+                  "let json = {}; try { json = pm.response.json(); } catch (e) {}",
+                  "if (json.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "POST /auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Lists (Protected)",
+      "item": [
+        {
+          "name": "GET /lists/:listName",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listName}}?page=1&limit=50&sort=addedAt:desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listName}}"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "50"},
+                {"key": "sort", "value": "addedAt:desc"}
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Watchlist Movies",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/lists/watchlist?page=1&limit=50&sort=addedAt:desc",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["lists", "watchlist"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "limit", "value": "50"},
+                    {"key": "sort", "value": "addedAt:desc"}
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "{\n  \"items\": [\n    {\n      \"id\": \"b30cfc0a-cc1c-4e76-abbe-7356c08939be\",\n      \"tmdbId\": 603,\n      \"title\": \"The Matrix\",\n      \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\",\n      \"addedAt\": \"2024-01-15T10:30:00.000Z\"\n    },\n    {\n      \"id\": \"b929dfe6-868a-421f-8a32-5ca1f1f5faff\",\n      \"tmdbId\": 550,\n      \"title\": \"Fight Club\",\n      \"posterPath\": \"/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg\",\n      \"addedAt\": \"2024-01-14T15:20:00.000Z\"\n    }\n  ],\n  \"total\": 2,\n  \"page\": 1,\n  \"limit\": 50,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /lists/:listName",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tmdbId\": {{tmdbId}},\n  \"title\": \"The Matrix\",\n  \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listName}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listName}}"]
+            }
+          },
+          "response": [
+            {
+              "name": "Add Movie to List",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"tmdbId\": 603,\n  \"title\": \"The Matrix\",\n  \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/lists/watchlist",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["lists", "watchlist"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": \"b30cfc0a-cc1c-4e76-abbe-7356c08939be\",\n  \"tmdbId\": 603,\n  \"title\": \"The Matrix\",\n  \"posterPath\": \"/f89q3dFQbQ5XxHh4XJeH2hFgLD0.jpg\",\n  \"addedAt\": \"2024-01-15T10:30:00.000Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /lists/:listName/:tmdbId",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listName}}/{{tmdbId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listName}}", "{{tmdbId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Recommendations (Protected)",
+      "item": [
+        {
+          "name": "POST /recommendations (Basic - with Iranian filter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"action movies\",\n  \"language\": \"{{language}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Recommendations - Persian",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"action movies like John Wick\",\n  \"language\": \"fa\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"جان ویک: فصل ۳ - پارابلوم\",\n    \"year\": 2019,\n    \"reason\": \"فیلم اکشن با مبارزات شدید و داستان انتقام مشابه جان ویک\",\n    \"tmdbId\": 458156,\n    \"posterPath\": \"/ziEuG1essDuWuC5lpWUaw1uXY2O.jpg\",\n    \"overview\": \"جان ویک پس از کشتن یکی از اعضای سازمان مخفی روی میز بین‌المللی، مجبور به فرار می‌شود.\"\n  },\n  {\n    \"title\": \"اتمیک بلوند\",\n    \"year\": 2017,\n    \"reason\": \"فیلم اکشن با مبارزات سریع و شخصیت اصلی ماهر در مبارزه\",\n    \"tmdbId\": 341013,\n    \"posterPath\": \"/kV9R5h0Yct1kR8Hf8sJ1nX0Vz4x.jpg\",\n    \"overview\": \"جاسوس زیبا و خطرناکی در برلین شرقی سال ۱۹۸۹ ماموریت دارد.\"\n  }\n]"
+            },
+            {
+              "name": "Recommendations - English",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"sci-fi movies with time travel\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"Back to the Future\",\n    \"year\": 1985,\n    \"reason\": \"Classic time travel movie with a teenager going back to the 1950s\",\n    \"tmdbId\": 105,\n    \"posterPath\": \"/fNOH9f1aA7XRTzl1sAOx9iF553Q.jpg\",\n    \"overview\": \"Eighties teenager Marty McFly is accidentally sent back in time to 1955.\"\n  },\n  {\n    \"title\": \"Groundhog Day\",\n    \"year\": 1993,\n    \"reason\": \"Time loop movie where the protagonist relives the same day\",\n    \"tmdbId\": 137,\n    \"posterPath\": \"/gyudd8k9QdP9ES9sAPaq7wcLJUe.jpg\",\n    \"overview\": \"A narcissistic TV weatherman finds himself stuck in a time loop.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /recommendations (Custom Content Filter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"comedy movies\",\n  \"language\": \"{{language}}\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"PG\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [18, 27, 53],\n    \"excludeKeywords\": [\"violence\", \"blood\", \"death\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Custom Filtered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"comedy movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"PG\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [18, 27, 53],\n    \"excludeKeywords\": [\"violence\", \"blood\", \"death\"]\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"توی استودیو\",\n    \"year\": 2008,\n    \"reason\": \"فیلم کمدی خانوادگی مناسب برای همه سنین\",\n    \"tmdbId\": 10515,\n    \"posterPath\": \"/example_poster.jpg\",\n    \"overview\": \"داستان کمدی درباره گروهی از دوستان که در استودیو فیلم کار می‌کنند.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /recommendations (No Content Filter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"all movies\",\n  \"language\": \"{{language}}\",\n  \"contentFilter\": {\n    \"includeAdult\": true,\n    \"maxCertification\": \"NC-17\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Unfiltered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"all movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": true,\n    \"maxCertification\": \"NC-17\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"فیلم نمونه\",\n    \"year\": 2023,\n    \"reason\": \"فیلم با محتوای بزرگسالان\",\n    \"tmdbId\": 12345,\n    \"posterPath\": \"/example_poster.jpg\",\n    \"overview\": \"داستان فیلم با محتوای مناسب برای بزرگسالان.\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users (Protected)",
+      "item": [
+        {
+          "name": "GET /users/profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /users/profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Filmchi User\",\n  \"bio\": \"Movie enthusiast\",\n  \"location\": \"New York\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\",\n  \"favoriteGenres\": [\"Action\", \"Sci-Fi\"],\n  \"favoriteDirectors\": [\"Christopher Nolan\"],\n  \"favoriteActors\": [\"Leonardo DiCaprio\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /users/stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "stats"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /users/preferences",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferences\": {\n    \"theme\": \"dark\",\n    \"language\": \"en\",\n    \"notifications\": {\n      \"email\": true,\n      \"push\": false\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/preferences",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "preferences"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /users/privacy",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"privacy\": {\n    \"profileVisible\": true,\n    \"activityVisible\": false,\n    \"listsVisible\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/privacy",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "privacy"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /users/activity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/activity",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "activity"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /users/export",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/export",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "export"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /users/account",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/account",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "account"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Persian Language Examples",
+      "item": [
+        {
+          "name": "Search Matrix in Persian",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/search?q=Matrix&lang=fa",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "search"],
+              "query": [
+                {"key": "q", "value": "Matrix"},
+                {"key": "lang", "value": "fa"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Matrix Details in Persian",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/603?lang=fa",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "603"],
+              "query": [
+                {"key": "lang", "value": "fa"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Trending Movies in Persian",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/trending?lang=fa",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "trending"],
+              "query": [
+                {"key": "lang", "value": "fa"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Genres in Persian",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movies/genres?lang=fa",
+              "host": ["{{baseUrl}}"],
+              "path": ["movies", "genres"],
+              "query": [
+                {"key": "lang", "value": "fa"}
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Recommendations in Persian (Protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"action movies like John Wick\",\n  \"language\": \"fa\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Content Filtering Examples",
+      "item": [
+        {
+          "name": "POST /recommendations (Iranian Filter - Default)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"action movies\",\n  \"language\": \"fa\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Iranian Filtered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"action movies\",\n  \"language\": \"fa\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"10 Things I Hate About You\",\n    \"year\": 1999,\n    \"reason\": \"فیلم کمدی رمانتیک کلاسیک دهه 90 با رتبه PG-13\",\n    \"tmdbId\": 4951,\n    \"posterPath\": \"/ujERk3aKABXU3NDXOAxEQYTHe9A.jpg\",\n    \"overview\": \"این فیلم برگرفته شده از یکی از نمایشنامه‌های شکسپیر می باشد که به شکل مدرن و در میان دانش آموزان دبیرستانی به اجرا در می آید.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /recommendations (Strict Family Filter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"family movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"G\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [18, 27, 53, 80],\n    \"excludeKeywords\": [\"violence\", \"death\", \"blood\", \"sex\", \"nude\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Strict Family Filtered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"family movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"G\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [18, 27, 53, 80],\n    \"excludeKeywords\": [\"violence\", \"death\", \"blood\", \"sex\", \"nude\"]\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"یخ‌زده\",\n    \"year\": 2013,\n    \"reason\": \"انیمیشن خانوادگی مناسب برای همه سنین\",\n    \"tmdbId\": 109445,\n    \"posterPath\": \"/jIjdFXKUNtdz1m4f3QnPD6nFnWV.jpg\",\n    \"overview\": \"داستان دو خواهر که در سفری جادویی برای نجات پادشاهی خود شرکت می‌کنند.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /recommendations (Teen Filter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"teen movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"PG-13\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [27, 80],\n    \"excludeKeywords\": [\"sex\", \"nude\", \"explicit\", \"adult\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Teen Filtered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"teen movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": false,\n    \"maxCertification\": \"PG-13\",\n    \"certificationCountry\": \"US\",\n    \"excludeGenres\": [27, 80],\n    \"excludeKeywords\": [\"sex\", \"nude\", \"explicit\", \"adult\"]\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"دبیرستان موزیکال\",\n    \"year\": 2006,\n    \"reason\": \"فیلم موزیکال مناسب برای نوجوانان\",\n    \"tmdbId\": 11423,\n    \"posterPath\": \"/example_poster.jpg\",\n    \"overview\": \"داستان دانش‌آموزان دبیرستان که در مسابقه موزیکال شرکت می‌کنند.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /recommendations (No Filter - All Content)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"drama movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": true,\n    \"maxCertification\": \"NC-17\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recommendations",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"]
+            }
+          },
+          "response": [
+            {
+              "name": "Unfiltered Recommendations",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {"key": "Content-Type", "value": "application/json"}
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"query\": \"drama movies\",\n  \"language\": \"fa\",\n  \"contentFilter\": {\n    \"includeAdult\": true,\n    \"maxCertification\": \"NC-17\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/recommendations",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["recommendations"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {"key": "Content-Type", "value": "application/json"}
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"title\": \"فیلم درام نمونه\",\n    \"year\": 2023,\n    \"reason\": \"فیلم درام با محتوای بزرگسالان\",\n    \"tmdbId\": 12345,\n    \"posterPath\": \"/example_poster.jpg\",\n    \"overview\": \"داستان درام با محتوای مناسب برای بزرگسالان.\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
