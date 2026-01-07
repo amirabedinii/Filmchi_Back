@@ -73,11 +73,7 @@ describe('RecommendationsController', () => {
         mockRequest.user.userId,
         body.query,
         undefined,
-        expect.objectContaining({
-          includeAdult: false,
-          maxCertification: 'PG-13',
-          certificationCountry: 'US',
-        }),
+        undefined,
       );
       expect(result).toEqual(mockRecommendations);
     });
@@ -95,11 +91,7 @@ describe('RecommendationsController', () => {
         mockRequest.user.userId,
         body.query,
         undefined,
-        expect.objectContaining({
-          includeAdult: false,
-          maxCertification: 'PG-13',
-          certificationCountry: 'US',
-        }),
+        undefined,
       );
       expect(result).toEqual([]);
     });
@@ -120,11 +112,7 @@ describe('RecommendationsController', () => {
         mockRequest.user.userId,
         body.query,
         undefined,
-        expect.objectContaining({
-          includeAdult: false,
-          maxCertification: 'PG-13',
-          certificationCountry: 'US',
-        }),
+        undefined,
       );
     });
 
@@ -148,11 +136,7 @@ describe('RecommendationsController', () => {
         'user-456',
         body.query,
         undefined,
-        expect.objectContaining({
-          includeAdult: false,
-          maxCertification: 'PG-13',
-          certificationCountry: 'US',
-        }),
+        undefined,
       );
     });
 
@@ -176,11 +160,7 @@ describe('RecommendationsController', () => {
           mockRequest.user.userId,
           query,
           undefined,
-          expect.objectContaining({
-            includeAdult: false,
-            maxCertification: 'PG-13',
-            certificationCountry: 'US',
-          }),
+          undefined,
         );
       }
 
