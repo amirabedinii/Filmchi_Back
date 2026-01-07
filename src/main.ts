@@ -6,7 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { 
+  const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
     // Set global timeout for all requests
     bodyParser: true,
@@ -25,7 +25,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  
+
   // Set request timeout
   app.use((req, res, next) => {
     req.setTimeout(60000); // 60 seconds

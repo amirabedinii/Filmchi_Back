@@ -48,7 +48,7 @@ export class MoviesService {
     private readonly bookmarkRepo: Repository<MovieBookmark>,
     @Inject(CACHE_PROVIDER)
     private readonly cache: ICacheProvider,
-  ) { }
+  ) {}
 
   /**
    * Generate cache key for movie searches
@@ -136,7 +136,11 @@ export class MoviesService {
     }
 
     const response = await this.tmdb.get('/search/movie', params);
-    const result = filterTmdbResponse(response, options.contentFilter, options.language);
+    const result = filterTmdbResponse(
+      response,
+      options.contentFilter,
+      options.language,
+    );
 
     // Cache the result
     await this.cache.set(cacheKey, result, this.CACHE_TTL.SEARCH_RESULTS);
@@ -177,7 +181,11 @@ export class MoviesService {
 
     // Cache the result (only if no userId)
     if (!userId) {
-      await this.cache.set(cacheKey, filteredMovie, this.CACHE_TTL.MOVIE_DETAILS);
+      await this.cache.set(
+        cacheKey,
+        filteredMovie,
+        this.CACHE_TTL.MOVIE_DETAILS,
+      );
     }
 
     return filteredMovie;
@@ -230,7 +238,12 @@ export class MoviesService {
     language?: string,
     contentFilter?: ContentFilterOptions,
   ) {
-    const cacheKey = this.getSimilarCacheKey(tmdbId, page, language, contentFilter);
+    const cacheKey = this.getSimilarCacheKey(
+      tmdbId,
+      page,
+      language,
+      contentFilter,
+    );
 
     // Try to get from cache
     const cached = await this.cache.get<any>(cacheKey);

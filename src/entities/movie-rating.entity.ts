@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, Unique, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Unique,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 
 @Entity('movie_ratings')
 @Unique('UQ_movie_rating_user_tmdb', ['userId', 'tmdbId'])
@@ -23,5 +31,3 @@ export class MovieRating {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
-
-

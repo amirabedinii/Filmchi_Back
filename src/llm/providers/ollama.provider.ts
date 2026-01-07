@@ -45,7 +45,8 @@ export class OllamaProvider extends BaseLLMProvider {
     // Enhance prompt with language instruction if needed
     let enhancedPrompt = request.prompt;
     const language = request.metadata?.language;
-    const isPersian = language === 'fa' || language === 'persian' || language === 'farsi';
+    const isPersian =
+      language === 'fa' || language === 'persian' || language === 'farsi';
     if (isPersian && request.schema) {
       enhancedPrompt += `\n\n🔴 CRITICAL: Write the "reason" field in Persian/Farsi (فارسی). Movie titles in English, explanations in فارسی.`;
     }

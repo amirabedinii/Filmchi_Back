@@ -4,10 +4,18 @@ class TestProvider extends BaseLLMProvider {
   readonly name = 'test';
   readonly supportedModels = ['m'];
   async generateCompletion<T = any>(request: any): Promise<any> {
-    return this.createResponse('ok', 'm', { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 });
+    return this.createResponse('ok', 'm', {
+      prompt_tokens: 1,
+      completion_tokens: 2,
+      total_tokens: 3,
+    });
   }
-  validateConfig() { return true; }
-  async isAvailable() { return true; }
+  validateConfig() {
+    return true;
+  }
+  async isAvailable() {
+    return true;
+  }
 }
 
 describe('BaseLLMProvider', () => {
@@ -15,7 +23,7 @@ describe('BaseLLMProvider', () => {
 
   beforeAll(() => {
     // Suppress console warnings during tests
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => { });
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterAll(() => {
@@ -25,13 +33,20 @@ describe('BaseLLMProvider', () => {
 
   it('validateRequest throws on empty prompt', () => {
     const p = new TestProvider() as any;
-    expect(() => p.validateRequest({ prompt: '   ' } as any)).toThrow('Prompt is required and cannot be empty');
+    expect(() => p.validateRequest({ prompt: '   ' } as any)).toThrow(
+      'Prompt is required and cannot be empty',
+    );
   });
 
   it('createResponse maps usage keys and provider name', async () => {
     const p = new TestProvider();
     const res = await p.generateCompletion({} as any);
-    expect(res).toEqual({ data: 'ok', model: 'm', provider: 'test', usage: { promptTokens: 1, completionTokens: 2, totalTokens: 3 } });
+    expect(res).toEqual({
+      data: 'ok',
+      model: 'm',
+      provider: 'test',
+      usage: { promptTokens: 1, completionTokens: 2, totalTokens: 3 },
+    });
   });
 
   it('retryWithBackoff retries then throws last error', async () => {
@@ -41,5 +56,3 @@ describe('BaseLLMProvider', () => {
     expect(op).toHaveBeenCalledTimes(2);
   });
 });
-
-

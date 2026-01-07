@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Post, Query, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { MoviesService } from './movies.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
@@ -56,7 +64,9 @@ export class MoviesController {
       withGenres,
       sortBy,
       language,
-      contentFilter: contentFilter ? JSON.parse(contentFilter) : IRANIAN_CONTENT_FILTER,
+      contentFilter: contentFilter
+        ? JSON.parse(contentFilter)
+        : IRANIAN_CONTENT_FILTER,
     });
   }
 
@@ -69,31 +79,56 @@ export class MoviesController {
   @Get('trending')
   trending(@Query('page') page?: string, @Query('lang') lang?: string) {
     const language = validateLanguage(lang);
-    return this.movies.getList('trending', page ? Number(page) : 1, language, IRANIAN_CONTENT_FILTER);
+    return this.movies.getList(
+      'trending',
+      page ? Number(page) : 1,
+      language,
+      IRANIAN_CONTENT_FILTER,
+    );
   }
 
   @Get('popular')
   popular(@Query('page') page?: string, @Query('lang') lang?: string) {
     const language = validateLanguage(lang);
-    return this.movies.getList('popular', page ? Number(page) : 1, language, IRANIAN_CONTENT_FILTER);
+    return this.movies.getList(
+      'popular',
+      page ? Number(page) : 1,
+      language,
+      IRANIAN_CONTENT_FILTER,
+    );
   }
 
   @Get('top-rated')
   topRated(@Query('page') page?: string, @Query('lang') lang?: string) {
     const language = validateLanguage(lang);
-    return this.movies.getList('top_rated', page ? Number(page) : 1, language, IRANIAN_CONTENT_FILTER);
+    return this.movies.getList(
+      'top_rated',
+      page ? Number(page) : 1,
+      language,
+      IRANIAN_CONTENT_FILTER,
+    );
   }
 
   @Get('now-playing')
   nowPlaying(@Query('page') page?: string, @Query('lang') lang?: string) {
     const language = validateLanguage(lang);
-    return this.movies.getList('now_playing', page ? Number(page) : 1, language, IRANIAN_CONTENT_FILTER);
+    return this.movies.getList(
+      'now_playing',
+      page ? Number(page) : 1,
+      language,
+      IRANIAN_CONTENT_FILTER,
+    );
   }
 
   @Get('upcoming')
   upcoming(@Query('page') page?: string, @Query('lang') lang?: string) {
     const language = validateLanguage(lang);
-    return this.movies.getList('upcoming', page ? Number(page) : 1, language, IRANIAN_CONTENT_FILTER);
+    return this.movies.getList(
+      'upcoming',
+      page ? Number(page) : 1,
+      language,
+      IRANIAN_CONTENT_FILTER,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -121,9 +156,18 @@ export class MoviesController {
   }
 
   @Get(':tmdbId/similar')
-  similar(@Param('tmdbId') tmdbId: string, @Query('page') page?: string, @Query('lang') lang?: string) {
+  similar(
+    @Param('tmdbId') tmdbId: string,
+    @Query('page') page?: string,
+    @Query('lang') lang?: string,
+  ) {
     const language = validateLanguage(lang);
-    return this.movies.getSimilar(Number(tmdbId), page ? Number(page) : 1, language, IRANIAN_CONTENT_FILTER);
+    return this.movies.getSimilar(
+      Number(tmdbId),
+      page ? Number(page) : 1,
+      language,
+      IRANIAN_CONTENT_FILTER,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
@@ -140,7 +184,8 @@ export class MoviesController {
   async bookmark(
     @CurrentUser() user: ReqUser,
     @Param('tmdbId') tmdbId: string,
-    @Body() body?: { title?: string; posterPath?: string; releaseDate?: string },
+    @Body()
+    body?: { title?: string; posterPath?: string; releaseDate?: string },
   ) {
     return this.movies.bookmarkMovie(user.userId, Number(tmdbId), body);
   }
@@ -165,5 +210,3 @@ export class MoviesController {
     return this.movies.setUserRating(user.userId, Number(tmdbId), r);
   }
 }
-
-

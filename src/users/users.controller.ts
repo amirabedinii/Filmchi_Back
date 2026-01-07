@@ -1,7 +1,20 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { UpdatePreferencesDto, UpdatePrivacyDto, UpdateProfileDto } from './dto/profile.dto';
+import {
+  UpdatePreferencesDto,
+  UpdatePrivacyDto,
+  UpdateProfileDto,
+} from './dto/profile.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Req } from '@nestjs/common';
 
@@ -53,5 +66,3 @@ export class UsersController {
     await this.usersService.softDelete(req.user.userId);
   }
 }
-
-

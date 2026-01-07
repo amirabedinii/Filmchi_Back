@@ -8,12 +8,12 @@ import { CACHE_PROVIDER } from './cache.interface';
  */
 @Global()
 @Module({
-    providers: [
-        {
-            provide: CACHE_PROVIDER,
-            useClass: RedisCacheProvider,
-        },
-    ],
-    exports: [CACHE_PROVIDER],
+  providers: [
+    {
+      provide: CACHE_PROVIDER,
+      useClass: RedisCacheProvider,
+    },
+  ],
+  exports: [CACHE_PROVIDER],
 })
-export class CacheModule { }
+export class CacheModule {}

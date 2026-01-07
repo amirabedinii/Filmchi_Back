@@ -1,4 +1,11 @@
-import { IsOptional, IsString, IsArray, ArrayMaxSize, IsUrl, MaxLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsArray,
+  ArrayMaxSize,
+  IsUrl,
+  MaxLength,
+} from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -47,5 +54,3 @@ export class UpdatePreferencesDto {
   // free-form object; validated by business logic
   preferences?: Record<string, any>;
 }
-
-

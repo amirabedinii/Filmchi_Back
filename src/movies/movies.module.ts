@@ -9,10 +9,13 @@ import { ListsModule } from '../lists/lists.module';
 import { TmdbModule } from './tmdb.module';
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([MovieRating, MovieBookmark]), ListsModule, TmdbModule],
+  imports: [
+    HttpModule,
+    TypeOrmModule.forFeature([MovieRating, MovieBookmark]),
+    ListsModule,
+    TmdbModule,
+  ],
   controllers: [MoviesController],
   providers: [MoviesService],
 })
 export class MoviesModule {}
-
-

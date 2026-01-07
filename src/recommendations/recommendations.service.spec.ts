@@ -29,9 +29,9 @@ describe('RecommendationsService', () => {
 
   beforeAll(() => {
     // Suppress console logs during tests
-    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation(() => { });
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => { });
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+    consoleDebugSpy = jest.spyOn(console, 'debug').mockImplementation(() => {});
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterAll(() => {
@@ -47,7 +47,14 @@ describe('RecommendationsService', () => {
         RecommendationsService,
         { provide: ListsService, useClass: ListsServiceMock },
         { provide: LLMService, useClass: LLMServiceMock },
-        { provide: TmdbService, useValue: { searchMovie: jest.fn(), getMovieDetails: jest.fn(), hasAuthConfigured: jest.fn().mockReturnValue(true) } },
+        {
+          provide: TmdbService,
+          useValue: {
+            searchMovie: jest.fn(),
+            getMovieDetails: jest.fn(),
+            hasAuthConfigured: jest.fn().mockReturnValue(true),
+          },
+        },
         {
           provide: HttpService,
           useValue: {
@@ -66,8 +73,7 @@ describe('RecommendationsService', () => {
           },
         },
       ],
-    })
-      .compile();
+    }).compile();
 
     service = moduleRef.get(RecommendationsService);
     listsService = moduleRef.get(ListsService);
@@ -94,7 +100,7 @@ describe('RecommendationsService', () => {
     });
 
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
-      recommendations: []
+      recommendations: [],
     });
 
     const result = await service.getRecommendations(
@@ -131,7 +137,7 @@ describe('RecommendationsService', () => {
     });
 
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
-      recommendations: []
+      recommendations: [],
     });
 
     await service.getRecommendations('user-1', 'smart sci-fi with humor');
@@ -144,8 +150,20 @@ describe('RecommendationsService', () => {
   });
 
   it('calls TMDB to enrich each recommendation and merges results', async () => {
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
 
     // LLM Service returns recommendations
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
@@ -155,8 +173,14 @@ describe('RecommendationsService', () => {
     });
 
     // TMDB search -> id and details via wrapper
-    (tmdbService.searchMovie as jest.Mock).mockResolvedValueOnce({ results: [{ id: 27205 }] });
-    (tmdbService.getMovieDetails as jest.Mock).mockResolvedValueOnce({ id: 27205, poster_path: '/x.jpg', overview: 'desc' });
+    (tmdbService.searchMovie as jest.Mock).mockResolvedValueOnce({
+      results: [{ id: 27205 }],
+    });
+    (tmdbService.getMovieDetails as jest.Mock).mockResolvedValueOnce({
+      id: 27205,
+      poster_path: '/x.jpg',
+      overview: 'desc',
+    });
 
     const res = await service.getRecommendations(
       'user-1',
@@ -174,25 +198,49 @@ describe('RecommendationsService', () => {
   });
 
   it('skips recommendations not found on TMDB', async () => {
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
 
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
-      recommendations: [
-        { title: 'Unknown Movie', year: 1999, reason: 'test' },
-      ],
+      recommendations: [{ title: 'Unknown Movie', year: 1999, reason: 'test' }],
     });
 
     // TMDB search returns empty
-    (tmdbService.searchMovie as jest.Mock).mockResolvedValueOnce({ results: [] });
+    (tmdbService.searchMovie as jest.Mock).mockResolvedValueOnce({
+      results: [],
+    });
 
     const res = await service.getRecommendations('user-1', 'anything');
     expect(res).toEqual([]);
   });
 
   it('returns [] when LLM service throws', async () => {
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
     llmService.generateMovieRecommendations.mockRejectedValueOnce(
       new Error('LLM service error'),
     );
@@ -205,8 +253,20 @@ describe('RecommendationsService', () => {
     // Simulate missing TMDB auth
     (tmdbService.hasAuthConfigured as jest.Mock).mockReturnValueOnce(false);
 
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
       recommendations: [
         { title: 'Movie A', reason: 'test' },
@@ -224,17 +284,31 @@ describe('RecommendationsService', () => {
   it('uses bearer token path for TMDB when provided and handles TMDB error gracefully', async () => {
     // Leave auth configured; simulate details failure
 
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
-      recommendations: [
-        { title: 'X', year: 2015, reason: 'reason' },
-      ],
+      recommendations: [{ title: 'X', year: 2015, reason: 'reason' }],
     });
 
     // Simulate TMDB search success, details throws to exercise catch
-    (tmdbService.searchMovie as jest.Mock).mockResolvedValueOnce({ results: [{ id: 1, title: 'X', release_date: '2015-01-01' }] });
-    (tmdbService.getMovieDetails as jest.Mock).mockRejectedValueOnce(new Error('TMDB details failure'));
+    (tmdbService.searchMovie as jest.Mock).mockResolvedValueOnce({
+      results: [{ id: 1, title: 'X', release_date: '2015-01-01' }],
+    });
+    (tmdbService.getMovieDetails as jest.Mock).mockRejectedValueOnce(
+      new Error('TMDB details failure'),
+    );
 
     const res = await service.getRecommendations('user-1', 'q');
     // Because details returned null-ish, enrichment returns null and gets filtered -> []
@@ -249,16 +323,28 @@ describe('RecommendationsService', () => {
       return undefined;
     });
 
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
-    listsService.getMoviesForList.mockResolvedValueOnce({ items: [], total: 0, page: 1, limit: 50, totalPages: 0 });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
+    listsService.getMoviesForList.mockResolvedValueOnce({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0,
+    });
     llmService.generateMovieRecommendations.mockResolvedValueOnce({
-      recommendations: [
-        { title: 'Y', reason: 'r' },
-      ],
+      recommendations: [{ title: 'Y', reason: 'r' }],
     });
 
     // First TMDB call throws
-    (tmdbService.searchMovie as jest.Mock).mockRejectedValueOnce(new Error('search fail'));
+    (tmdbService.searchMovie as jest.Mock).mockRejectedValueOnce(
+      new Error('search fail'),
+    );
 
     const res = await service.getRecommendations('user-1', 'q');
     expect(res).toEqual([]);
@@ -268,8 +354,18 @@ describe('RecommendationsService', () => {
     // Directly exercise private logic through public flow
     const anyService = service as any;
     const results = [
-      { id: 1, title: 'zzzzzzzzzzzzzzzzzzzzzzzzzz', release_date: '1900-01-01', popularity: 0 },
-      { id: 2, title: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx', release_date: '1800-01-01', popularity: 0 },
+      {
+        id: 1,
+        title: 'zzzzzzzzzzzzzzzzzzzzzzzzzz',
+        release_date: '1900-01-01',
+        popularity: 0,
+      },
+      {
+        id: 2,
+        title: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+        release_date: '1800-01-01',
+        popularity: 0,
+      },
     ];
     const picked = anyService.pickBestTmdbMatch('Target Title', 2020, results);
     expect(picked).toBeNull();

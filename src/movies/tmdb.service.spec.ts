@@ -51,5 +51,3 @@ describe('TmdbService', () => {
     expect(call.url).toMatch(/api_key=apikey/);
   });
 });
-
-

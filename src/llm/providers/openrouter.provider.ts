@@ -83,10 +83,11 @@ export class OpenRouterProvider extends BaseLLMProvider {
     if (request.schema) {
       enhancedPrompt += `\n\nYou MUST respond with valid JSON matching this exact schema:\n${JSON.stringify(request.schema, null, 2)}`;
     }
-    
+
     // Add language instruction AFTER schema for maximum emphasis
     const language = request.metadata?.language;
-    const isPersian = language === 'fa' || language === 'persian' || language === 'farsi';
+    const isPersian =
+      language === 'fa' || language === 'persian' || language === 'farsi';
     if (isPersian) {
       enhancedPrompt += `\n\n🔴 CRITICAL LANGUAGE REQUIREMENT 🔴\nYou MUST write the "reason" field in Persian/Farsi language.\nMovie titles stay in English, but ALL explanations and reasons MUST be written in فارسی.\nThis is mandatory and non-negotiable.`;
     }
@@ -94,7 +95,7 @@ export class OpenRouterProvider extends BaseLLMProvider {
     try {
       // Generate a random seed to prevent caching and ensure varied responses
       const randomSeed = Math.floor(Math.random() * 1000000);
-      
+
       const completion = await this.retryWithBackoff(
         () =>
           this.openai.chat.completions.create({
@@ -155,7 +156,10 @@ export class OpenRouterProvider extends BaseLLMProvider {
 
       return this.createResponse(parsedData, model, usage);
     } catch (error) {
-      this.logger.error(`OpenRouter completion failed: ${error.message}`, error);
+      this.logger.error(
+        `OpenRouter completion failed: ${error.message}`,
+        error,
+      );
       throw new Error(`OpenRouter request failed: ${error.message}`);
     }
   }
@@ -191,7 +195,9 @@ export class OpenRouterProvider extends BaseLLMProvider {
       await this.openai.models.list();
       return true;
     } catch (error) {
-      this.logger.warn(`OpenRouter availability check failed: ${error.message}`);
+      this.logger.warn(
+        `OpenRouter availability check failed: ${error.message}`,
+      );
       return false;
     }
   }

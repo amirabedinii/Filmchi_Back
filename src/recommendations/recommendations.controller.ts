@@ -17,11 +17,16 @@ export class RecommendationsController {
   async get(@Req() req: any, @Body() body: GetRecommendationsDto) {
     const userId = req.user.userId;
     const language = body.language?.toLowerCase();
-    
+
     // Use provided content filter or default to Iranian filter
     const contentFilter = body.contentFilter || IRANIAN_CONTENT_FILTER;
-    
-    const data = await this.service.getRecommendations(userId, body.query, language, contentFilter);
+
+    const data = await this.service.getRecommendations(
+      userId,
+      body.query,
+      language,
+      contentFilter,
+    );
     return data;
   }
 }

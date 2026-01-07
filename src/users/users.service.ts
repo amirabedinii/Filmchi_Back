@@ -2,7 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { UpdatePreferencesDto, UpdatePrivacyDto, UpdateProfileDto } from './dto/profile.dto';
+import {
+  UpdatePreferencesDto,
+  UpdatePrivacyDto,
+  UpdateProfileDto,
+} from './dto/profile.dto';
 import { MovieList } from '../entities/movie-list.entity';
 import { ListItem } from '../entities/list-item.entity';
 
@@ -34,15 +38,22 @@ export class UsersService {
     return this.userRepo.save(user);
   }
 
-  async updatePreferences(userId: string, dto: UpdatePreferencesDto): Promise<User> {
+  async updatePreferences(
+    userId: string,
+    dto: UpdatePreferencesDto,
+  ): Promise<User> {
     const user = await this.getById(userId);
     user.accountPreferences = dto.preferences ?? user.accountPreferences ?? {};
     return this.userRepo.save(user);
   }
 
-  async stats(userId: string): Promise<{ lists: number; items: number } & Record<string, number>> {
+  async stats(
+    userId: string,
+  ): Promise<{ lists: number; items: number } & Record<string, number>> {
     // Counts based on movie lists and list items
-    const listsCount = await this.userRepo.manager.count(MovieList, { where: { userId } });
+    const listsCount = await this.userRepo.manager.count(MovieList, {
+      where: { userId },
+    });
     const itemsCount = await this.userRepo.manager
       .createQueryBuilder(ListItem, 'li')
       .innerJoin(MovieList, 'ml', 'ml.id = li.movie_list_id')
@@ -83,5 +94,3 @@ export class UsersService {
     };
   }
 }
-
-

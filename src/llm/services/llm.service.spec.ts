@@ -14,7 +14,7 @@ describe('LLMService', () => {
 
   beforeAll(() => {
     // Suppress console errors during tests
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterAll(() => {

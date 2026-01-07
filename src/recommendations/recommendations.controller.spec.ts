@@ -47,7 +47,9 @@ describe('RecommendationsController', () => {
       ],
     }).compile();
 
-    controller = module.get<RecommendationsController>(RecommendationsController);
+    controller = module.get<RecommendationsController>(
+      RecommendationsController,
+    );
     recommendationsService = module.get(RecommendationsService);
   });
 

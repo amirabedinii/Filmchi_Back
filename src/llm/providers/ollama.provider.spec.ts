@@ -13,7 +13,7 @@ describe('OllamaProvider', () => {
 
   beforeAll(() => {
     // Suppress console errors during tests
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterAll(() => {
@@ -104,7 +104,9 @@ describe('OllamaProvider', () => {
         if (key === 'OLLAMA_MODEL') return 'llama3.1';
         return undefined;
       });
-      httpService.get.mockReturnValue(throwError(() => new Error('Connection failed')));
+      httpService.get.mockReturnValue(
+        throwError(() => new Error('Connection failed')),
+      );
 
       const result = await provider.isAvailable();
 
@@ -193,15 +195,24 @@ describe('OllamaProvider', () => {
       });
       httpService.post.mockReturnValue(of(mockResponse as any));
 
-      const result = await provider.generateCompletion<{ recommendations: Array<{ title: string; reason: string }> }>({
+      const result = await provider.generateCompletion<{
+        recommendations: Array<{ title: string; reason: string }>;
+      }>({
         prompt: 'p',
         temperature: 0.2,
         maxTokens: 10,
         schema: { type: 'object' } as any,
       });
 
-      expect(result.data.recommendations[0]).toEqual({ title: 'T', reason: 'r' });
-      expect(result.usage).toEqual({ promptTokens: 3, completionTokens: 5, totalTokens: 8 });
+      expect(result.data.recommendations[0]).toEqual({
+        title: 'T',
+        reason: 'r',
+      });
+      expect(result.usage).toEqual({
+        promptTokens: 3,
+        completionTokens: 5,
+        totalTokens: 8,
+      });
     });
 
     it('should throw error when prompt is empty', async () => {
@@ -229,7 +240,9 @@ describe('OllamaProvider', () => {
         return undefined;
       });
 
-      httpService.post.mockReturnValue(throwError(() => new Error('Network error')));
+      httpService.post.mockReturnValue(
+        throwError(() => new Error('Network error')),
+      );
 
       await expect(provider.generateCompletion(mockRequest)).rejects.toThrow(
         'Ollama request failed: Network error',
@@ -244,11 +257,20 @@ describe('OllamaProvider', () => {
         return undefined;
       });
       httpService.post.mockReturnValue(
-        of({ data: { response: '{invalid json', prompt_eval_count: 1, eval_count: 2 } } as any),
+        of({
+          data: {
+            response: '{invalid json',
+            prompt_eval_count: 1,
+            eval_count: 2,
+          },
+        } as any),
       );
 
       await expect(
-        provider.generateCompletion({ ...mockRequest, schema: { type: 'object' } as any }),
+        provider.generateCompletion({
+          ...mockRequest,
+          schema: { type: 'object' } as any,
+        }),
       ).rejects.toThrow('Invalid JSON response from Ollama');
     });
   });

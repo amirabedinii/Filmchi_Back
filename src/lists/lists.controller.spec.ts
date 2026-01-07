@@ -217,11 +217,7 @@ describe('ListsController', () => {
     it('should remove a movie from the list', async () => {
       listsService.removeMovieFromList.mockResolvedValue(true);
 
-      const result = await controller.removeMovie(
-        mockUser,
-        'watchlist',
-        '123',
-      );
+      const result = await controller.removeMovie(mockUser, 'watchlist', '123');
 
       expect(listsService.removeMovieFromList).toHaveBeenCalledWith(
         mockUser.userId,

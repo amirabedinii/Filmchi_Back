@@ -108,4 +108,4 @@ import { CacheModule } from './cache/cache.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

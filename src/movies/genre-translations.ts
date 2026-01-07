@@ -25,7 +25,10 @@ export const GENRE_TRANSLATIONS = {
 
 export type SupportedLanguage = keyof typeof GENRE_TRANSLATIONS;
 
-export function getGenreTranslation(genreId: number, language: string): string | null {
+export function getGenreTranslation(
+  genreId: number,
+  language: string,
+): string | null {
   const lang = language as SupportedLanguage;
   if (!GENRE_TRANSLATIONS[lang]) {
     return null;

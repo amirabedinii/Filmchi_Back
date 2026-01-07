@@ -46,5 +46,3 @@ describe('UsersService', () => {
     expect(s0.items).toBe(0);
   });
 });
-
-

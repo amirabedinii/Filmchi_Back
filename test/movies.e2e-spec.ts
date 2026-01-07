@@ -18,21 +18,57 @@ describe('Movies (e2e)', () => {
         request: jest
           .fn()
           // search
-          .mockReturnValueOnce(of({ data: { results: [{ id: 1, title: 'Matrix', poster_path: '/poster.jpg' }] } } as any))
+          .mockReturnValueOnce(
+            of({
+              data: {
+                results: [
+                  { id: 1, title: 'Matrix', poster_path: '/poster.jpg' },
+                ],
+              },
+            } as any),
+          )
           // details
-          .mockReturnValueOnce(of({ data: { id: 1, title: 'Matrix', poster_path: '/poster.jpg' } } as any))
+          .mockReturnValueOnce(
+            of({
+              data: { id: 1, title: 'Matrix', poster_path: '/poster.jpg' },
+            } as any),
+          )
           // trending
-          .mockReturnValueOnce(of({ data: { results: [{ id: 2, poster_path: '/poster.jpg' }] } } as any))
+          .mockReturnValueOnce(
+            of({
+              data: { results: [{ id: 2, poster_path: '/poster.jpg' }] },
+            } as any),
+          )
           // popular
-          .mockReturnValueOnce(of({ data: { results: [{ id: 3, poster_path: '/poster.jpg' }] } } as any))
+          .mockReturnValueOnce(
+            of({
+              data: { results: [{ id: 3, poster_path: '/poster.jpg' }] },
+            } as any),
+          )
           // top rated
-          .mockReturnValueOnce(of({ data: { results: [{ id: 4, poster_path: '/poster.jpg' }] } } as any))
+          .mockReturnValueOnce(
+            of({
+              data: { results: [{ id: 4, poster_path: '/poster.jpg' }] },
+            } as any),
+          )
           // now playing
-          .mockReturnValueOnce(of({ data: { results: [{ id: 5, poster_path: '/poster.jpg' }] } } as any))
+          .mockReturnValueOnce(
+            of({
+              data: { results: [{ id: 5, poster_path: '/poster.jpg' }] },
+            } as any),
+          )
           // upcoming
-          .mockReturnValueOnce(of({ data: { results: [{ id: 6, poster_path: '/poster.jpg' }] } } as any))
+          .mockReturnValueOnce(
+            of({
+              data: { results: [{ id: 6, poster_path: '/poster.jpg' }] },
+            } as any),
+          )
           // similar
-          .mockReturnValueOnce(of({ data: { results: [{ id: 7, poster_path: '/poster.jpg' }] } } as any)),
+          .mockReturnValueOnce(
+            of({
+              data: { results: [{ id: 7, poster_path: '/poster.jpg' }] },
+            } as any),
+          ),
       })
       .compile();
 
@@ -91,5 +127,3 @@ describe('Movies (e2e)', () => {
       .expect((r) => expect(r.body).toEqual({ tmdbId: 10, rating: 8 }));
   });
 });
-
-

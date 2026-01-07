@@ -43,7 +43,10 @@ describe('MoviesService', () => {
         { provide: ConfigService, useValue: configMock },
         { provide: TmdbService, useValue: tmdbMock },
         { provide: getRepositoryToken(MovieRating), useValue: repoMock },
-        { provide: getRepositoryToken(MovieBookmark), useValue: bookmarkRepoMock },
+        {
+          provide: getRepositoryToken(MovieBookmark),
+          useValue: bookmarkRepoMock,
+        },
         { provide: CACHE_PROVIDER, useValue: cacheMock },
       ],
     }).compile();
@@ -54,10 +57,16 @@ describe('MoviesService', () => {
 
   it('searchMovies builds bearer request', async () => {
     (cacheMock.get as jest.Mock).mockResolvedValueOnce(null); // Cache miss
-    (tmdbMock.get as any).mockResolvedValueOnce({ results: [], total_results: 0 });
+    (tmdbMock.get as any).mockResolvedValueOnce({
+      results: [],
+      total_results: 0,
+    });
     const res = await service.searchMovies({ query: 'Matrix', page: 1 });
     expect(res).toEqual({ results: [], total_results: 0 });
-    expect(tmdbMock.get).toHaveBeenCalledWith('/search/movie', expect.any(Object));
+    expect(tmdbMock.get).toHaveBeenCalledWith(
+      '/search/movie',
+      expect.any(Object),
+    );
   });
 
   it('getMovieDetails returns data', async () => {
@@ -65,7 +74,7 @@ describe('MoviesService', () => {
     (tmdbMock.getMovieDetails as jest.Mock).mockResolvedValueOnce({
       id: 1,
       title: 'Test Movie',
-      poster_path: '/test.jpg' // Needed to pass filterSingleMovie
+      poster_path: '/test.jpg', // Needed to pass filterSingleMovie
     });
     const res = await service.getMovieDetails(1);
     expect(res.id).toBe(1);
@@ -77,10 +86,12 @@ describe('MoviesService', () => {
     const created = await service.setUserRating('u1', 10, 8);
     expect(created).toEqual({ tmdbId: 10, rating: 8 });
 
-    (repoMock.findOne as any).mockResolvedValueOnce({ userId: 'u1', tmdbId: 10, rating: 5 });
+    (repoMock.findOne as any).mockResolvedValueOnce({
+      userId: 'u1',
+      tmdbId: 10,
+      rating: 5,
+    });
     const updated = await service.setUserRating('u1', 10, 9);
     expect(updated).toEqual({ tmdbId: 10, rating: 9 });
   });
 });
-
-

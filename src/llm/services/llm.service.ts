@@ -128,18 +128,24 @@ export class LLMService {
   private buildMovieRecommendationPrompt(
     request: RecommendationRequest,
   ): string {
-    const { userQuery, userHistory, maxRecommendations = 7, language } = request;
+    const {
+      userQuery,
+      userHistory,
+      maxRecommendations = 7,
+      language,
+    } = request;
     const historyStr = userHistory.slice(0, 50).join(', ');
-    
+
     // Determine if response should be in Persian
-    const isPersian = language === 'fa' || language === 'persian' || language === 'farsi';
-    const languageInstruction = isPersian 
+    const isPersian =
+      language === 'fa' || language === 'persian' || language === 'farsi';
+    const languageInstruction = isPersian
       ? '\n\n🎬 PERSIAN LANGUAGE REQUIREMENTS:\n- Write ALL recommendation reasons ("reason" field) in Persian/Farsi language\n- Movie titles remain in their original form (English/Persian)\n- Include 2-3 Iranian/Persian films in your recommendations (films from Iran cinema)\n- Mix Iranian cinema with international films to provide variety\n- Consider classic and contemporary Iranian films based on the user\'s request'
       : '';
 
     // Add unique request ID to prevent caching
     const requestId = `REQ-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-    
+
     return [
       'You are an expert movie recommendation engine with deep knowledge of cinema across all genres, eras, and cultures.',
       'You have exceptional understanding of human emotions and can recommend movies that match specific moods and feelings.',
@@ -158,9 +164,9 @@ export class LLMService {
       '- CAREFULLY read and understand EXACTLY what the user is asking for',
       '- If the user asks for sad/emotional/tragic films, recommend SAD and EMOTIONAL movies - DO NOT try to "cheer them up"',
       '- If the user asks for happy/uplifting films, recommend HAPPY and UPLIFTING movies',
-      '- RESPECT the user\'s explicit request - they know what they want to watch',
+      "- RESPECT the user's explicit request - they know what they want to watch",
       '- Match the MOOD and GENRE they specifically request, not what you think they need',
-      '- Consider the user\'s viewing history and preferences when selecting movies',
+      "- Consider the user's viewing history and preferences when selecting movies",
       '- If the user writes in Persian/Farsi, include Iranian/Persian cinema in recommendations (mix with international films)',
       '- For Persian language queries, recommend 2-3 Iranian films alongside international films',
       '- Provide a mix of popular and hidden gem films',

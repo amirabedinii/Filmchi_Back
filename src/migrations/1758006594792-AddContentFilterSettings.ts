@@ -1,6 +1,8 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class AddContentFilterSettings1758006594792 implements MigrationInterface {
+export class AddContentFilterSettings1758006594792
+  implements MigrationInterface
+{
   name = 'AddContentFilterSettings1758006594792';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

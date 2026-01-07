@@ -63,7 +63,11 @@ export class User {
   accountPreferences: Record<string, any> | null;
 
   // Content filtering preferences
-  @Column({ name: 'content_filter_settings', type: 'simple-json', nullable: true })
+  @Column({
+    name: 'content_filter_settings',
+    type: 'simple-json',
+    nullable: true,
+  })
   contentFilterSettings: {
     includeAdult?: boolean;
     maxCertification?: string;

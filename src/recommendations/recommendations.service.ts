@@ -5,7 +5,12 @@ import { firstValueFrom } from 'rxjs';
 import { ListsService } from '../lists/lists.service';
 import { LLMService } from '../llm/services/llm.service';
 import { TmdbService } from '../movies/tmdb.service';
-import { filterMoviesWithPoster, filterContent, ContentFilterOptions, IRANIAN_CONTENT_FILTER } from '../movies/utils/movie-filter.util';
+import {
+  filterMoviesWithPoster,
+  filterContent,
+  ContentFilterOptions,
+  IRANIAN_CONTENT_FILTER,
+} from '../movies/utils/movie-filter.util';
 
 type RawRecommendation = { title: string; year?: number; reason: string };
 
@@ -23,7 +28,7 @@ export class RecommendationsService {
     private readonly listsService: ListsService,
     private readonly llmService: LLMService,
     private readonly tmdb: TmdbService,
-  ) { }
+  ) {}
 
   async getRecommendations(
     userId: string,
@@ -43,7 +48,10 @@ export class RecommendationsService {
       { page: 1, limit: 50, sort: 'desc' },
     );
     Logger.debug(
-      { watchedCount: watchedResponse.items.length, watchlistCount: watchlistResponse.items.length },
+      {
+        watchedCount: watchedResponse.items.length,
+        watchlistCount: watchlistResponse.items.length,
+      },
       'Recommendations: list counts',
     );
 
@@ -106,7 +114,12 @@ export class RecommendationsService {
       const batch = rawRecs.slice(i, i + concurrencyLimit);
       const batchPromises = batch.map(async (rec) => {
         try {
-          const tmdb = await this.findOnTmdb(rec.title, rec.year, language, contentFilter);
+          const tmdb = await this.findOnTmdb(
+            rec.title,
+            rec.year,
+            language,
+            contentFilter,
+          );
           if (!tmdb) {
             Logger.debug(
               { title: rec.title, year: rec.year },
@@ -131,7 +144,9 @@ export class RecommendationsService {
       });
 
       const batchResults = await Promise.all(batchPromises);
-      enriched.push(...batchResults.filter(Boolean) as EnrichedRecommendation[]);
+      enriched.push(
+        ...(batchResults.filter(Boolean) as EnrichedRecommendation[]),
+      );
     }
 
     Logger.debug(
@@ -141,7 +156,7 @@ export class RecommendationsService {
 
     // Debug: show poster_path values before filtering
     Logger.debug(
-      { posterPaths: enriched.map(r => r.posterPath) },
+      { posterPaths: enriched.map((r) => r.posterPath) },
       'Recommendations: poster_path values before filtering',
     );
 
@@ -153,25 +168,25 @@ export class RecommendationsService {
 
     // Debug: check what properties are actually present
     Logger.debug(
-      { properties: enriched.map(r => Object.keys(r)) },
+      { properties: enriched.map((r) => Object.keys(r)) },
       'Recommendations: object properties before filtering',
     );
 
     // Filter out recommendations with null poster_path
     // Note: The filter function expects 'poster_path' but we have 'posterPath'
     // Temporarily map the property for debugging
-    const moviesForFiltering = enriched.map(movie => ({
+    const moviesForFiltering = enriched.map((movie) => ({
       ...movie,
-      poster_path: movie.posterPath
+      poster_path: movie.posterPath,
     }));
 
     const filteredRecommendations = filterMoviesWithPoster(moviesForFiltering);
 
     // Map back to the original structure
-    const finalRecommendations = filteredRecommendations.map(movie => ({
+    const finalRecommendations = filteredRecommendations.map((movie) => ({
       ...movie,
       posterPath: movie.poster_path,
-      poster_path: undefined // remove the temporary property
+      poster_path: undefined, // remove the temporary property
     }));
 
     Logger.debug(
@@ -182,15 +197,29 @@ export class RecommendationsService {
     return finalRecommendations;
   }
 
-  private async findOnTmdb(title: string, year?: number, language?: string, contentFilter?: ContentFilterOptions): Promise<any | null> {
+  private async findOnTmdb(
+    title: string,
+    year?: number,
+    language?: string,
+    contentFilter?: ContentFilterOptions,
+  ): Promise<any | null> {
     try {
       // Add timeout wrapper for TMDB requests
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('TMDB request timeout')), 8000)
+        setTimeout(() => reject(new Error('TMDB request timeout')), 8000),
       );
 
-      const searchPromise = this.tmdb.searchMovie(title, year, 1, language, contentFilter);
-      const searchResp = await Promise.race([searchPromise, timeoutPromise]) as any;
+      const searchPromise = this.tmdb.searchMovie(
+        title,
+        year,
+        1,
+        language,
+        contentFilter,
+      );
+      const searchResp = (await Promise.race([
+        searchPromise,
+        timeoutPromise,
+      ])) as any;
 
       const results = Array.isArray(searchResp?.results)
         ? searchResp.results
@@ -204,11 +233,18 @@ export class RecommendationsService {
       if (!best) return null;
 
       const detailsPromise = this.tmdb.getMovieDetails(best.id, language);
-      const detailsResp = await Promise.race([detailsPromise, timeoutPromise]) as any;
+      const detailsResp = (await Promise.race([
+        detailsPromise,
+        timeoutPromise,
+      ])) as any;
 
       // Apply additional content filtering on the movie details if needed
       if (contentFilter && detailsResp) {
-        const filteredResults = filterContent([detailsResp], contentFilter, language);
+        const filteredResults = filterContent(
+          [detailsResp],
+          contentFilter,
+          language,
+        );
         if (filteredResults.length === 0) {
           Logger.debug({ title, year }, 'Movie filtered out by content filter');
           return null;
@@ -243,7 +279,7 @@ export class RecommendationsService {
       const titleScore =
         1 -
         this.levenshteinDistance(targetTitle, rTitle) /
-        Math.max(targetTitle.length || 1, rTitle.length || 1);
+          Math.max(targetTitle.length || 1, rTitle.length || 1);
       const yearScore =
         targetYear && rYear
           ? Math.abs(targetYear - rYear) <= 1

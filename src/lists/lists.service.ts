@@ -42,7 +42,7 @@ export class ListsService {
       skip: (page - 1) * limit,
       take: limit,
     });
-    
+
     return {
       items: items.map((i) => ({
         id: i.id,
