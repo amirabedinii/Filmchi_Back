@@ -1,7 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { firstValueFrom } from 'rxjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MovieRating } from '../entities/movie-rating.entity';
@@ -13,7 +12,6 @@ import {
   filterMoviesWithPoster,
   ContentFilterOptions,
   createTmdbFilterParams,
-  addMobileBackdrop,
 } from './utils/movie-filter.util';
 import type { ICacheProvider } from '../cache/cache.interface';
 import { CACHE_PROVIDER } from '../cache/cache.interface';

@@ -56,7 +56,7 @@ describe('MoviesService', () => {
   });
 
   it('searchMovies builds bearer request', async () => {
-    (cacheMock.get as jest.Mock).mockResolvedValueOnce(null); // Cache miss
+    cacheMock.get.mockResolvedValueOnce(null); // Cache miss
     (tmdbMock.get as any).mockResolvedValueOnce({
       results: [],
       total_results: 0,
@@ -70,7 +70,7 @@ describe('MoviesService', () => {
   });
 
   it('getMovieDetails returns data', async () => {
-    (cacheMock.get as jest.Mock).mockResolvedValueOnce(null); // Cache miss
+    cacheMock.get.mockResolvedValueOnce(null); // Cache miss
     (tmdbMock.getMovieDetails as jest.Mock).mockResolvedValueOnce({
       id: 1,
       title: 'Test Movie',

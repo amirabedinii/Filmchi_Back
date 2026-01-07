@@ -71,7 +71,7 @@ export class TmdbService {
       timeout: 100000, // 100 seconds timeout
     });
     const response = await firstValueFrom(observable);
-    return response.data as T;
+    return response.data;
   }
 
   // Convenience helpers

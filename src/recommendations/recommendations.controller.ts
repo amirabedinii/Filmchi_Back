@@ -2,11 +2,6 @@ import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { RecommendationsService } from './recommendations.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { GetRecommendationsDto } from './dto/get-recommendations.dto';
-import { IRANIAN_CONTENT_FILTER } from '../movies/utils/movie-filter.util';
-
-class RecommendationsDto {
-  query!: string;
-}
 
 @Controller('recommendations')
 export class RecommendationsController {
@@ -18,8 +13,8 @@ export class RecommendationsController {
     const userId = req.user.userId;
     const language = body.language?.toLowerCase();
 
-    // Use provided content filter or default to Iranian filter
-    const contentFilter = body.contentFilter || IRANIAN_CONTENT_FILTER;
+    // Use provided content filter or no filter
+    const contentFilter = body.contentFilter;
 
     const data = await this.service.getRecommendations(
       userId,

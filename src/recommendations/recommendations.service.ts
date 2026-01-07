@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { firstValueFrom } from 'rxjs';
 import { ListsService } from '../lists/lists.service';
 import { LLMService } from '../llm/services/llm.service';
 import { TmdbService } from '../movies/tmdb.service';
@@ -9,7 +8,6 @@ import {
   filterMoviesWithPoster,
   filterContent,
   ContentFilterOptions,
-  IRANIAN_CONTENT_FILTER,
 } from '../movies/utils/movie-filter.util';
 
 type RawRecommendation = { title: string; year?: number; reason: string };
@@ -216,10 +214,7 @@ export class RecommendationsService {
         language,
         contentFilter,
       );
-      const searchResp = (await Promise.race([
-        searchPromise,
-        timeoutPromise,
-      ])) as any;
+      const searchResp = await Promise.race([searchPromise, timeoutPromise]);
 
       const results = Array.isArray(searchResp?.results)
         ? searchResp.results
@@ -233,10 +228,7 @@ export class RecommendationsService {
       if (!best) return null;
 
       const detailsPromise = this.tmdb.getMovieDetails(best.id, language);
-      const detailsResp = (await Promise.race([
-        detailsPromise,
-        timeoutPromise,
-      ])) as any;
+      const detailsResp = await Promise.race([detailsPromise, timeoutPromise]);
 
       // Apply additional content filtering on the movie details if needed
       if (contentFilter && detailsResp) {

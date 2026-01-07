@@ -6,7 +6,6 @@ import {
   Param,
   Body,
   UseGuards,
-  ConflictException,
   NotFoundException,
   Query,
 } from '@nestjs/common';

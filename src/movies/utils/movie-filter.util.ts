@@ -252,7 +252,7 @@ export function filterContent<T extends MovieWithCertification>(
   const {
     includeAdult = false,
     maxCertification,
-    certificationCountry = 'US',
+    certificationCountry: _certificationCountry = 'US',
     excludeGenres = [],
     excludeKeywords = [],
     originCountries = [],

@@ -80,7 +80,7 @@ describe('RecommendationsService', () => {
     llmService = moduleRef.get(LLMService);
     httpService = moduleRef.get(HttpService);
     configService = moduleRef.get(ConfigService);
-    tmdbService = moduleRef.get(TmdbService) as any;
+    tmdbService = moduleRef.get(TmdbService);
   });
 
   it('fetches watched and watchlist history from ListsService', async () => {

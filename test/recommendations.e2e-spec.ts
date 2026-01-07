@@ -78,7 +78,7 @@ describe('Recommendations (e2e)', () => {
   });
 
   it('should return enriched recommendations with token', async () => {
-    const res = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/recommendations')
       .set('Authorization', `Bearer ${accessToken}`)
       .send({ query: 'smart sci-fi' })
