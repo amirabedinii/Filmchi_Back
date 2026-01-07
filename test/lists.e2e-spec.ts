@@ -38,8 +38,9 @@ describe('Lists (e2e)', () => {
         .get('/lists/watchlist')
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(0);
+      expect(res.body).toHaveProperty('items');
+      expect(Array.isArray(res.body.items)).toBe(true);
+      expect(res.body.items.length).toBe(0);
     });
 
     it('should reject malformed JWT', async () => {
@@ -64,7 +65,7 @@ describe('Lists (e2e)', () => {
         .get('/lists/watchlist')
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
-      expect(listRes.body.find((m: any) => m.tmdbId === 100)).toBeTruthy();
+      expect(listRes.body.items.find((m: any) => m.tmdbId === 100)).toBeTruthy();
     });
 
     it('should be idempotent when adding a duplicate movie (return 201 with existing)', async () => {
@@ -100,7 +101,7 @@ describe('Lists (e2e)', () => {
         .get('/lists/watched')
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(200);
-      expect(res.body.find((m: any) => m.tmdbId === 202)).toBeFalsy();
+      expect(res.body.items.find((m: any) => m.tmdbId === 202)).toBeFalsy();
     });
     describe('GET /lists/:listName pagination and sorting', () => {
       it('should paginate and sort results', async () => {
@@ -117,14 +118,14 @@ describe('Lists (e2e)', () => {
           .get('/lists/custom?limit=2&page=1&sort=addedAt:desc')
           .set('Authorization', `Bearer ${accessToken}`)
           .expect(200);
-        expect(page1.body.length).toBe(2);
+        expect(page1.body.items.length).toBe(2);
 
         const page2 = await request(app.getHttpServer())
           .get('/lists/custom?limit=2&page=2&sort=addedAt:desc')
           .set('Authorization', `Bearer ${accessToken}`)
           .expect(200);
-        expect(page2.body.length).toBe(2);
-        expect(page1.body[0].addedAt >= page1.body[1].addedAt).toBeTruthy();
+        expect(page2.body.items.length).toBe(2);
+        expect(page1.body.items[0].addedAt >= page1.body.items[1].addedAt).toBeTruthy();
       });
 
       it('should support ascending sort', async () => {
@@ -132,10 +133,10 @@ describe('Lists (e2e)', () => {
           .get('/lists/custom?limit=3&page=1&sort=addedAt:asc')
           .set('Authorization', `Bearer ${accessToken}`)
           .expect(200);
-        expect(res.body.length).toBeGreaterThanOrEqual(1);
+        expect(res.body.items.length).toBeGreaterThanOrEqual(1);
         // ascending
-        if (res.body.length >= 2) {
-          expect(res.body[0].addedAt <= res.body[1].addedAt).toBeTruthy();
+        if (res.body.items.length >= 2) {
+          expect(res.body.items[0].addedAt <= res.body.items[1].addedAt).toBeTruthy();
         }
       });
 
@@ -145,7 +146,8 @@ describe('Lists (e2e)', () => {
           .set('Authorization', `Bearer ${accessToken}`)
           .expect(200);
         // Should not crash and return array
-        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body).toHaveProperty('items');
+        expect(Array.isArray(res.body.items)).toBe(true);
       });
     });
 

@@ -2,42 +2,32 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { HttpService } from '@nestjs/axios';
-import { of } from 'rxjs';
 import { LLMService } from '../src/llm/services/llm.service';
+import { TmdbService } from '../src/movies/tmdb.service';
 
 describe('Recommendations (e2e)', () => {
   let app: INestApplication;
   let accessToken: string;
 
   beforeAll(async () => {
+    const mockTmdbService = {
+      hasAuthConfigured: jest.fn().mockReturnValue(true),
+      searchMovie: jest.fn().mockResolvedValue({
+        results: [{ id: 27205, title: 'Inception', poster_path: '/x.jpg' }],
+      }),
+      getMovieDetails: jest.fn().mockResolvedValue({
+        id: 27205,
+        title: 'Inception',
+        poster_path: '/x.jpg',
+        overview: 'desc',
+      }),
+    };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(HttpService)
-      .useValue({
-        post: jest.fn(() =>
-          of({
-            data: {
-              recommendations: [
-                { title: 'Inception', year: 2010, reason: 'mind-bending' },
-              ],
-            },
-          } as any),
-        ),
-        get: jest
-          .fn()
-          // TMDB search
-          .mockReturnValueOnce(
-            of({ data: { results: [{ id: 27205 }] } } as any),
-          )
-          // TMDB details
-          .mockReturnValueOnce(
-            of({
-              data: { id: 27205, poster_path: '/x.jpg', overview: 'desc' },
-            } as any),
-          ),
-      })
+      .overrideProvider(TmdbService)
+      .useValue(mockTmdbService)
       .overrideProvider(LLMService)
       .useValue({
         generateMovieRecommendations: jest.fn().mockResolvedValue({
