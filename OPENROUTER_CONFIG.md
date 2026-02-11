@@ -1,5 +1,9 @@
 # OpenRouter Configuration
 
+**فارسی (Persian):** [OPENROUTER_CONFIG.fa.md](OPENROUTER_CONFIG.fa.md)
+
+---
+
 To use OpenRouter as an LLM provider, add the following environment variables to your `.env` file:
 
 ## Required Variables

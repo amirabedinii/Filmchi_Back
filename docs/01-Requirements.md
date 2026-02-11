@@ -1,5 +1,9 @@
 # 01. Requirements & Constraints
 
+**فارسی (Persian):** [۰۱. نیازمندی‌ها و محدودیت‌ها](01-Requirements.fa.md)
+
+---
+
 ## 1. Functional Requirements (FR)
 
 ### **Authentication & Identity**

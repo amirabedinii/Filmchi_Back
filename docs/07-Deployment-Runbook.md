@@ -1,5 +1,9 @@
 # 07. Deployment Runbook
 
+**فارسی (Persian):** [۰۷. راهنمای استقرار](07-Deployment-Runbook.fa.md)
+
+---
+
 ## 1. Environment Variables
 The application relies on `dotenv` and `@nestjs/config` with Joi validation.
 

@@ -1,5 +1,9 @@
 # 08. Traceability Matrices
 
+**فارسی (Persian):** [۰۸. ماتریس‌های ردیابی](08-Traceability.fa.md)
+
+---
+
 ## Matrix A: Functional Requirement -> Code Evidence
 
 | Req ID | Feature | Controller | Service Method | Entity |

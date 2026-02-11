@@ -1,5 +1,9 @@
 # 02. Use Cases
 
+**فارسی (Persian):** [۰۲. موارد استفاده](02-UseCases.fa.md)
+
+---
+
 ## 1. Authentication
 
 ### **UC-01: User Login**

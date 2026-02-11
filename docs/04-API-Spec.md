@@ -1,5 +1,9 @@
 # 04. API Specification
 
+**فارسی (Persian):** [۰۴. مشخصات API](04-API-Spec.fa.md)
+
+---
+
 ## 1. Overview
 - **Base URL**: `/api/v1` (configured in `main.ts`)
 - **Documentation**: Swagger UI available at `/docs` (configured in `main.ts`, line 48).

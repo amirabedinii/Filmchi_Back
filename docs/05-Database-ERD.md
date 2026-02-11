@@ -1,5 +1,9 @@
 # 05. Database ERD
 
+**فارسی (Persian):** [۰۵. ERD دیتابیس](05-Database-ERD.fa.md)
+
+---
+
 ## 1. Entity Overview
 The database uses **PostgreSQL** (via TypeORM). It mixes relational structures (User <-> Lists) with document-store patterns (Movie Data as JSON).
 

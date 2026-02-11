@@ -1,5 +1,9 @@
 # 00. Project Overview
 
+**Persian (فارسی):** [۰۰. نمای کلی پروژه](00-Overview.fa.md)
+
+---
+
 ## 1. Purpose & Scope
 **Filmchi Backend API** is the intelligent core of a movie discovery platform. Unlike traditional CRUD applications, it serves as a **smart aggregator and personalization engine**. Its primary purpose is to bridge the gap between static movie databases (TMDB) and dynamic user intent (Natural Language Queries), while providing a robust user management system.
 
@@ -60,3 +64,9 @@ The codebase is organized by domain modules (feature-sliced).
 - `docker-compose.yml`: Infrastructure setup (Postgres, Redis).
 - `src/app.module.ts`: Root module wiring and Joi validation for ENV.
 - `src/main.ts`: Entry point, Swagger, Helmet, global pipes.
+
+## 5. Documentation Map (Engineering)
+- **Architecture & system diagram:** [03-Architecture.md](03-Architecture.md) · [فارسی](03-Architecture.fa.md)
+- **UML (Use Case, Class, Sequence, Activity):** [10-UML-Diagrams.md](10-UML-Diagrams.md) · [فارسی](10-UML-Diagrams.fa.md)
+- **API & database design:** [04-API-Spec.md](04-API-Spec.md) · [فارسی](04-API-Spec.fa.md), [05-Database-ERD.md](05-Database-ERD.md) · [فارسی](05-Database-ERD.fa.md)
+- **Testing & evaluation:** [06-Testing.md](06-Testing.md) · [فارسی](06-Testing.fa.md), [09-Evaluation.md](09-Evaluation.md) · [فارسی](09-Evaluation.fa.md) (cache impact, prompt evaluation)
