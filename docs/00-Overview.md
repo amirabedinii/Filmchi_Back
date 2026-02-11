@@ -27,23 +27,23 @@ The system follows a **Modular Monolith** architecture built on NestJS.
 
 ```mermaid
 flowchart TD
-    User[Client / User] -->|HTTP/REST| API[Filmchi API Gateway (NestJS)]
+    User["Client / User"] -->|HTTP/REST| API["Filmchi API Gateway NestJS"]
     
     subgraph "Filmchi Backend"
-        API --> Auth[Auth Module]
-        API --> Recs[Recommendations Module]
-        API --> Movies[Movies Module]
-        API --> Lists[Lists Module]
+        API --> Auth["Auth Module"]
+        API --> Recs["Recommendations Module"]
+        API --> Movies["Movies Module"]
+        API --> Lists["Lists Module"]
         
-        Recs --> LLM[LLM Service]
-        Movies --> Cache[Redis Cache]
-        Movies --> DB[(PostgreSQL)]
+        Recs --> LLM["LLM Service"]
+        Movies --> Cache["Redis Cache"]
+        Movies --> DB[("PostgreSQL")]
         Lists --> DB
         Auth --> DB
     end
     
-    LLM -->|Generate Options| Ollama[Ollama / External LLM]
-    Movies -->|Enrich Data| TMDB[TMDB API]
+    LLM -->|Generate Options| Ollama["Ollama / External LLM"]
+    Movies -->|Enrich Data| TMDB["TMDB API"]
 ```
 
 ## 4. Repository Map & Module Inventory
