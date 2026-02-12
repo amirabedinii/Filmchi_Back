@@ -12,12 +12,12 @@
 
 ```mermaid
 flowchart TB
-    subgraph Client["کلاینت (وب / موبایل)"]
+    subgraph Client["کلاینت وب / موبایل"]
         User[کاربر]
     end
 
-    subgraph FilmchiAPI["Filmchi Backend API (NestJS)"]
-        Gateway[API Gateway / REST]
+    subgraph FilmchiAPI["Filmchi Backend API NestJS"]
+        Gateway["API Gateway / REST"]
         
         subgraph Modules["ماژول‌های دامنه"]
             Auth[Auth]
@@ -28,8 +28,8 @@ flowchart TB
         end
         
         subgraph CrossCutting["امور فرامرزی"]
-            CacheMod[Cache Module]
-            LLMMod[LLM Module]
+            CacheMod["Cache Module"]
+            LLMMod["LLM Module"]
         end
         
         Gateway --> Auth
@@ -46,13 +46,13 @@ flowchart TB
     end
 
     subgraph Data["لایه داده"]
-        Redis[(Redis Cache)]
-        PG[(PostgreSQL)]
+        Redis["Redis Cache"]
+        PG["PostgreSQL"]
     end
 
     subgraph External["سرویس‌های خارجی"]
-        TMDB[TMDB API]
-        Ollama[Ollama / OpenRouter]
+        TMDB["TMDB API"]
+        Ollama["Ollama / OpenRouter"]
     end
 
     User <-->|HTTPS| Gateway
@@ -112,7 +112,7 @@ flowchart LR
     UpdateRedis --> Return
     
     CheckDB -- No --> FetchTMDB[Fetch TMDB API]
-    FetchTMDB --> PersistDB[Save to DB (jsonb)]
+    FetchTMDB --> PersistDB["Save to DB jsonb"]
     PersistDB --> UpdateRedis
 ```
 

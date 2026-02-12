@@ -10,12 +10,12 @@ High-level view of the system in three layers: client, API, and external/data se
 
 ```mermaid
 flowchart TB
-    subgraph Client["Client (Web / Mobile)"]
+    subgraph Client["Client Web / Mobile"]
         User[User]
     end
 
-    subgraph FilmchiAPI["Filmchi Backend API (NestJS)"]
-        Gateway[API Gateway / REST]
+    subgraph FilmchiAPI["Filmchi Backend API NestJS"]
+        Gateway["API Gateway / REST"]
         
         subgraph Modules["Domain Modules"]
             Auth[Auth]
@@ -26,8 +26,8 @@ flowchart TB
         end
         
         subgraph CrossCutting["Cross-Cutting"]
-            CacheMod[Cache Module]
-            LLMMod[LLM Module]
+            CacheMod["Cache Module"]
+            LLMMod["LLM Module"]
         end
         
         Gateway --> Auth
@@ -44,13 +44,13 @@ flowchart TB
     end
 
     subgraph Data["Data Layer"]
-        Redis[(Redis Cache)]
-        PG[(PostgreSQL)]
+        Redis["Redis Cache"]
+        PG["PostgreSQL"]
     end
 
     subgraph External["External Services"]
-        TMDB[TMDB API]
-        Ollama[Ollama / OpenRouter]
+        TMDB["TMDB API"]
+        Ollama["Ollama / OpenRouter"]
     end
 
     User <-->|HTTPS| Gateway
@@ -107,7 +107,7 @@ flowchart LR
     UpdateRedis --> Return
     
     CheckDB -- No --> FetchTMDB[Fetch TMDB API]
-    FetchTMDB --> PersistDB[Save to DB (jsonb)]
+    FetchTMDB --> PersistDB["Save to DB jsonb"]
     PersistDB --> UpdateRedis
 ```
 
