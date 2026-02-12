@@ -161,6 +161,28 @@ Ensure environment variables are configured. Run `yarn build` then `yarn start:p
 - 403/404 on lists: verify `listName` is correct and the item exists.
 - Recommendations empty: check `OLLAMA_URL`, `OLLAMA_MODEL`, and `TMDB_API_KEY`.
 
+## Documentation (Engineering & Design)
+
+All docs exist in **two versions**: English (`.md`) and Persian / فارسی (`.fa.md`, RTL).
+
+- **Index:** [docs/INDEX.md](docs/INDEX.md) — list of all docs with links to both languages.
+
+| Doc | English | فارسی |
+|-----|---------|--------|
+| Overview | [docs/00-Overview.md](docs/00-Overview.md) | [docs/00-Overview.fa.md](docs/00-Overview.fa.md) |
+| Requirements | [docs/01-Requirements.md](docs/01-Requirements.md) | [docs/01-Requirements.fa.md](docs/01-Requirements.fa.md) |
+| Use Cases | [docs/02-UseCases.md](docs/02-UseCases.md) | [docs/02-UseCases.fa.md](docs/02-UseCases.fa.md) |
+| Architecture | [docs/03-Architecture.md](docs/03-Architecture.md) | [docs/03-Architecture.fa.md](docs/03-Architecture.fa.md) |
+| API Spec | [docs/04-API-Spec.md](docs/04-API-Spec.md) | [docs/04-API-Spec.fa.md](docs/04-API-Spec.fa.md) |
+| Database ERD | [docs/05-Database-ERD.md](docs/05-Database-ERD.md) | [docs/05-Database-ERD.fa.md](docs/05-Database-ERD.fa.md) |
+| Testing | [docs/06-Testing.md](docs/06-Testing.md) | [docs/06-Testing.fa.md](docs/06-Testing.fa.md) |
+| Deployment | [docs/07-Deployment-Runbook.md](docs/07-Deployment-Runbook.md) | [docs/07-Deployment-Runbook.fa.md](docs/07-Deployment-Runbook.fa.md) |
+| Traceability | [docs/08-Traceability.md](docs/08-Traceability.md) | [docs/08-Traceability.fa.md](docs/08-Traceability.fa.md) |
+| Evaluation | [docs/09-Evaluation.md](docs/09-Evaluation.md) | [docs/09-Evaluation.fa.md](docs/09-Evaluation.fa.md) |
+| UML Diagrams | [docs/10-UML-Diagrams.md](docs/10-UML-Diagrams.md) | [docs/10-UML-Diagrams.fa.md](docs/10-UML-Diagrams.fa.md) |
+
+Cache and prompt evaluation: see [docs/09-Evaluation.md](docs/09-Evaluation.md) (or [.fa.md](docs/09-Evaluation.fa.md)) and `scripts/benchmark-cache.sh`.
+
 ## Resources
 
 - NestJS docs: https://docs.nestjs.com

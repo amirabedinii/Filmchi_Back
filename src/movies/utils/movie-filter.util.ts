@@ -207,10 +207,15 @@ export function filterTmdbResponse(
     addMobileBackdrop(movie),
   );
 
+  const totalResults = filteredResults.length;
+  const pageSize = 20; // TMDB default page size
+  const totalPages = Math.max(1, Math.ceil(totalResults / pageSize));
+
   return {
     ...response,
     results: filteredResults,
-    total_results: filteredResults.length,
+    total_results: totalResults,
+    total_pages: totalPages,
   };
 }
 

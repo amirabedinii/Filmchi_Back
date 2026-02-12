@@ -1,5 +1,9 @@
 # Redis Cache Configuration
 
+**فارسی (Persian):** [CACHE.fa.md](CACHE.fa.md)
+
+---
+
 This document explains the caching system implemented in the Filmchi backend.
 
 ## Architecture
