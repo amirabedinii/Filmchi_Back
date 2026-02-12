@@ -21,6 +21,7 @@
 | ۰۸. ماتریس‌های ردیابی | [08-Traceability.md](08-Traceability.md) | [08-Traceability.fa.md](08-Traceability.fa.md) |
 | ۰۹. ارزیابی | [09-Evaluation.md](09-Evaluation.md) | [09-Evaluation.fa.md](09-Evaluation.fa.md) |
 | ۱۰. نمودارهای UML | [10-UML-Diagrams.md](10-UML-Diagrams.md) | [10-UML-Diagrams.fa.md](10-UML-Diagrams.fa.md) |
+| ۱۱. دیزاین پترن‌ها | [11-Design-Patterns.md](11-Design-Patterns.md) | [11-Design-Patterns.fa.md](11-Design-Patterns.fa.md) |
 
 **سایر مستندات پروژه:**  
 - ریشه: [README.md](../README.md) · [README.fa.md](../README.fa.md)  

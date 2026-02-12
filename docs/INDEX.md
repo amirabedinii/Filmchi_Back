@@ -19,6 +19,7 @@ Every document is available in **English** (`.md`) and **Persian / فارسی** 
 | 08. Traceability Matrices | [08-Traceability.md](08-Traceability.md) | [08-Traceability.fa.md](08-Traceability.fa.md) |
 | 09. Evaluation | [09-Evaluation.md](09-Evaluation.md) | [09-Evaluation.fa.md](09-Evaluation.fa.md) |
 | 10. UML Diagrams | [10-UML-Diagrams.md](10-UML-Diagrams.md) | [10-UML-Diagrams.fa.md](10-UML-Diagrams.fa.md) |
+| 11. Design Patterns | [11-Design-Patterns.md](11-Design-Patterns.md) | [11-Design-Patterns.fa.md](11-Design-Patterns.fa.md) |
 
 **Other project docs (en/fa):**
 - Root: [README.md](../README.md) · [README.fa.md](../README.fa.md)
