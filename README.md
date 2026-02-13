@@ -8,6 +8,26 @@ Filmchi is a NestJS backend that provides authentication, personal movie lists, 
 $ yarn install
 ```
 
+## Docker
+
+Run the full stack (API, PostgreSQL, Redis, pgAdmin) with Docker Compose:
+
+```bash
+# 1. Copy env template and set required secrets
+cp .env.docker.example .env
+# Edit .env: set JWT_SECRET and REFRESH_JWT_SECRET (min 16 chars each)
+
+# 2. Build and start
+docker compose up -d --build
+
+# 3. Access
+# - API: http://localhost:3001
+# - Swagger: http://localhost:3001/docs
+# - pgAdmin: http://localhost:5050 (default: admin@filmchi.local / admin)
+```
+
+To add the database in pgAdmin: Host `postgres`, Port `5432`, User/Password from `.env` (default: filmchi/filmchi).
+
 ## Environment
 
 Set environment variables via `.env.development` (used by default), `.env.test` (tests), or `.env` (production):
