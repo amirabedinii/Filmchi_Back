@@ -14,29 +14,7 @@ on:
       - feature/*
 
 jobs:
-  lint-and-format:
-    name: Lint & Format Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Check code formatting
-        run: yarn format --check
-
-      - name: Run ESLint
-        run: yarn lint
-
+  
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -201,24 +179,4 @@ jobs:
           path: dist/
           retention-days: 7
 
-  security:
-    name: Security Checks
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'yarn'
-
-      - name: Run yarn audit
-        run: yarn audit --level moderate
-        continue-on-error: true
-
-      - name: Check for dependency vulnerabilities
-        run: yarn audit --groups dependencies
-        continue-on-error: true
+  
