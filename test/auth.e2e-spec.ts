@@ -57,6 +57,43 @@ describe('Auth (e2e)', () => {
         .send(userData)
         .expect(409);
     });
+
+    describe('ثبت‌نام با داده نامعتبر (validation)', () => {
+      it('should return 400 when email is invalid', () => {
+        return request(app.getHttpServer())
+          .post('/auth/register')
+          .send({ email: 'not-an-email', password: 'password123' })
+          .expect(400)
+          .expect((res) => {
+            expect(res.body.message).toBeDefined();
+            expect(Array.isArray(res.body.message) || typeof res.body.message === 'object').toBe(true);
+          });
+      });
+
+      it('should return 400 when password is too short', () => {
+        return request(app.getHttpServer())
+          .post('/auth/register')
+          .send({ email: 'valid@example.com', password: '12345' })
+          .expect(400)
+          .expect((res) => {
+            expect(res.body.message).toBeDefined();
+          });
+      });
+
+      it('should return 400 when email is missing', () => {
+        return request(app.getHttpServer())
+          .post('/auth/register')
+          .send({ password: 'password123' })
+          .expect(400);
+      });
+
+      it('should return 400 when password is missing', () => {
+        return request(app.getHttpServer())
+          .post('/auth/register')
+          .send({ email: 'valid@example.com' })
+          .expect(400);
+      });
+    });
   });
 
   describe('POST /auth/login', () => {

@@ -62,7 +62,7 @@ describe('MoviesService', () => {
       total_results: 0,
     });
     const res = await service.searchMovies({ query: 'Matrix', page: 1 });
-    expect(res).toEqual({ results: [], total_results: 0 });
+    expect(res).toEqual({ results: [], total_results: 0, total_pages: 1 });
     expect(tmdbMock.get).toHaveBeenCalledWith(
       '/search/movie',
       expect.any(Object),

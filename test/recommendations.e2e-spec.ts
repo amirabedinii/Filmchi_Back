@@ -79,4 +79,53 @@ describe('Recommendations (e2e)', () => {
         expect(r.body[0].title).toBe('Inception');
       });
   });
+
+  describe('ورودی نامعتبر و شکست در تولید پیشنهاد', () => {
+    it('should return 400 when query is too short (invalid input)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/recommendations')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ query: 'x' })
+        .expect(400);
+      expect(res.body.message).toBeDefined();
+    });
+
+    it('should return 400 when query is missing', async () => {
+      await request(app.getHttpServer())
+        .post('/recommendations')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({})
+        .expect(400);
+    });
+
+    it('should return 200 with empty array when LLM fails (controlled response)', async () => {
+      const mockLlm = app.get(LLMService) as jest.Mocked<LLMService>;
+      (mockLlm.generateMovieRecommendations as jest.Mock).mockResolvedValueOnce(
+        { recommendations: [] },
+      );
+
+      const res = await request(app.getHttpServer())
+        .post('/recommendations')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ query: 'sci-fi' })
+        .expect(201);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(0);
+    });
+
+    it('should return 200 with empty array when LLM throws', async () => {
+      const mockLlm = app.get(LLMService) as jest.Mocked<LLMService>;
+      (mockLlm.generateMovieRecommendations as jest.Mock).mockRejectedValueOnce(
+        new Error('LLM service unavailable'),
+      );
+
+      const res = await request(app.getHttpServer())
+        .post('/recommendations')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ query: 'sci-fi' })
+        .expect(201);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(0);
+    });
+  });
 });

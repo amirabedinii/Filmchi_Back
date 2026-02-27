@@ -158,4 +158,43 @@ describe('Lists (e2e)', () => {
         .expect(404);
     });
   });
+
+  describe('جداسازی لیست‌ها بین کاربران (فقط لیست خود کاربر)', () => {
+    it('user B should not see or manage user A list items', async () => {
+      // User A (accessToken) adds a movie to watchlist
+      await request(app.getHttpServer())
+        .post('/lists/watchlist')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ tmdbId: 500, title: 'User A Private Movie' })
+        .expect(201);
+
+      // User B registers and gets own token
+      const userBEmail = `lists-userb-${Date.now()}@example.com`;
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: userBEmail, password: 'password123' })
+        .expect(201);
+      const loginB = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: userBEmail, password: 'password123' })
+        .expect(200);
+      const accessTokenB = loginB.body.accessToken;
+
+      // User B gets own watchlist — must be empty (no movie 500)
+      const listB = await request(app.getHttpServer())
+        .get('/lists/watchlist')
+        .set('Authorization', `Bearer ${accessTokenB}`)
+        .expect(200);
+      expect(listB.body.items).toBeDefined();
+      expect(Array.isArray(listB.body.items)).toBe(true);
+      const hasUserAMovie = listB.body.items.some((m: any) => m.tmdbId === 500);
+      expect(hasUserAMovie).toBe(false);
+
+      // User B cannot delete from user A list (delete from own list; movie 500 is not in B's list)
+      await request(app.getHttpServer())
+        .delete('/lists/watchlist/500')
+        .set('Authorization', `Bearer ${accessTokenB}`)
+        .expect(404);
+    });
+  });
 });

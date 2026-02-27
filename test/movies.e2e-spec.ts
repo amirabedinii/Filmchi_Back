@@ -110,4 +110,38 @@ describe('Movies (e2e)', () => {
       .expect(201)
       .expect((r) => expect(r.body).toEqual({ tmdbId: 10, rating: 8 }));
   });
+
+  describe('جست‌وجو و جزئیات فیلم - حالت‌های خطا و بدون نتیجه', () => {
+    it('should return 200 with empty results when search has no results', async () => {
+      const mockTmdb = app.get(TmdbService) as jest.Mocked<TmdbService>;
+      (mockTmdb.get as jest.Mock).mockResolvedValueOnce({ results: [] });
+
+      const res = await request(app.getHttpServer())
+        .get('/movies/search?q=NoMatchQuery')
+        .expect(200);
+      expect(res.body).toHaveProperty('results');
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results.length).toBe(0);
+    });
+
+    it('should return 200 with null or empty when movie details not found', async () => {
+      const mockTmdb = app.get(TmdbService) as jest.Mocked<TmdbService>;
+      (mockTmdb.getMovieDetails as jest.Mock).mockResolvedValueOnce(null);
+
+      const res = await request(app.getHttpServer())
+        .get('/movies/99999')
+        .expect(200);
+      // API may return null or {} when movie not found
+      expect(res.body === null || (typeof res.body === 'object' && !res.body?.id)).toBe(true);
+    });
+
+    it('should return 500 when TMDB fails for movie details', async () => {
+      const mockTmdb = app.get(TmdbService) as jest.Mocked<TmdbService>;
+      (mockTmdb.getMovieDetails as jest.Mock).mockRejectedValueOnce(
+        new Error('TMDB service unavailable'),
+      );
+      // Use id 2 so request is not served from cache (id 1 was requested in first test)
+      await request(app.getHttpServer()).get('/movies/2').expect(500);
+    });
+  });
 });
